@@ -10,211 +10,144 @@
 <script src="https://adexora.com/cdn/ads.js?id=1551"></script>
 
 <style>
-body{margin:0;font-family:Arial;background:#f6f7fb;}
+body{margin:0;font-family:Arial;background:#f6f7fb}
 .header{background:#ff4fa3;color:#fff;padding:18px;text-align:center;font-size:20px}
-.fixed-balance{background:#fff;margin:10px;padding:10px;border-radius:10px;text-align:center;font-weight:bold}
-.container{padding:15px}
-.card{background:#fff;border-radius:12px;padding:15px;margin-bottom:15px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.card{background:#fff;margin:12px;padding:15px;border-radius:12px}
 .balance{font-size:28px;font-weight:bold;text-align:center}
 .btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:16px;color:#fff;margin-top:10px}
-.btn-monetag{background:#3f5bd8}
-.btn-adexora{background:#9c27b0}
-.btn-withdraw{background:#28a745}
-.info{text-align:center;font-size:14px;margin-top:6px}
-.small{font-size:12px;color:#555;text-align:center}
+.btn-m{background:#3f5bd8}
+.btn-a{background:#9c27b0}
+.btn-w{background:#28a745}
 .nav{position:fixed;bottom:0;left:0;width:100%;display:flex;background:#ff4fa3}
 .nav button{flex:1;padding:12px;border:none;background:none;color:#fff}
 .hide{display:none}
 input,select{width:100%;padding:10px;margin-top:8px}
-.toast{display:none;position:fixed;top:15px;left:50%;transform:translateX(-50%);background:#d32f2f;color:#fff;padding:10px 18px;border-radius:20px;z-index:999}
-.row{display:flex;gap:10px}
+.small{font-size:13px;color:#555;text-align:center}
 </style>
 </head>
 
 <body>
 
-<div class="toast" id="toast"></div>
-
 <div class="header">💰 Earn Money Bot</div>
 
-<div class="fixed-balance">
-Balance: <span id="balanceFixed">0.00</span> ৳
+<div class="card">
+  <div class="balance" id="bal">0.00 ৳</div>
+  <div class="small">Total Balance</div>
 </div>
 
-<!-- HOME -->
-<div class="container" id="home">
-  <div class="card">
-    <div class="balance" id="balance">0.00 ৳</div>
-    <div style="text-align:center">Total Balance</div>
-  </div>
-
-  <div class="card">
-    <b>📌 কাজ করার নিয়ম</b>
-    <ul>
-      <li>সব বিজ্ঞাপন সম্পূর্ণ দেখবেন</li>
-      <li>Back দিলে Reward পাবেন না</li>
-      <li>নিয়ম মেনে কাজ করলে পেমেন্ট পাবেন</li>
-    </ul>
-  </div>
+<div class="card">
+  <button class="btn btn-m" onclick="watchMonetag()">📺 Watch Ad (Monetag)</button>
+  <button class="btn btn-a" onclick="watchAdexora()">📺 Watch Ad (Adexora)</button>
 </div>
 
-<!-- EARN -->
-<div class="container hide" id="earn">
-  <div class="card">
-    <div class="balance" id="balance2">0.00 ৳</div>
-  </div>
-
-  <div class="card">
-    <button class="btn btn-monetag" onclick="watchMonetag()">📺 Watch Ad (Monetag)</button>
-    <div class="info">দেখা হয়েছে: <span id="mSeenEl">0</span></div>
-
-    <button class="btn btn-adexora" onclick="watchAdexora()">📺 Watch Ad (Adexora)</button>
-    <div class="info">দেখা হয়েছে: <span id="aSeenEl">0</span></div>
-  </div>
-</div>
-
-<!-- WITHDRAW -->
-<div class="container hide" id="withdraw">
-  <div class="card">
-    <select id="method">
-      <option>Bkash</option>
-      <option>Nagad</option>
-    </select>
-
-    <input id="number" placeholder="Payment Number">
-
-    <select id="amount">
-      <option value="">Withdraw Amount</option>
-      <option value="50">50</option>
-      <option value="100">100</option>
-      <option value="150">150</option>
-      <option value="200">200</option>
-    </select>
-
-    <button class="btn btn-withdraw" onclick="withdraw()">Submit Withdraw</button>
-  </div>
-</div>
-
-<!-- HISTORY -->
-<div class="container hide" id="history">
-  <div class="card" id="historyBox"></div>
+<div class="card">
+  <select id="method">
+    <option>Bkash</option>
+    <option>Nagad</option>
+  </select>
+  <input id="number" placeholder="Payment Number">
+  <select id="amount">
+    <option value="">Withdraw Amount</option>
+    <option value="50">50</option>
+    <option value="100">100</option>
+    <option value="150">150</option>
+    <option value="200">200</option>
+  </select>
+  <button class="btn btn-w" onclick="withdraw()">Withdraw</button>
 </div>
 
 <div class="nav">
-  <button onclick="showTab('home')">Home</button>
-  <button onclick="showTab('earn')">Earn</button>
-  <button onclick="showTab('withdraw')">Withdraw</button>
-  <button onclick="showTab('history')">History</button>
+  <button onclick="location.reload()">Home</button>
+  <button onclick="copyRef()">Referral</button>
 </div>
 
-<!-- 🔥 FIREBASE SCRIPT -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+/* 🔥 FIREBASE */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import { getDatabase, ref, get, set, update, push, onValue }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDBSUP7tfK5IlvEEoDm3qwkMhH6MU8Q3jE",
-  authDomain: "maniriyelbot0.firebaseapp.com",
-  databaseURL: "https://maniriyelbot0-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "maniriyelbot0"
+ apiKey: "AIzaSyDYOXUgRTU9hFyQMR2o9FJupg8DwRpvTBA",
+ authDomain: "telegram-bot-system-133d4.firebaseapp.com",
+ databaseURL: "https://telegram-bot-system-133d4-default-rtdb.europe-west1.firebasedatabase.app",
+ projectId: "telegram-bot-system-133d4",
+ storageBucket: "telegram-bot-system-133d4.appspot.com",
+ messagingSenderId: "367398716302",
+ appId: "1:367398716302:web:43e91f145277f50313dadf"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const tg = window.Telegram.WebApp;
-tg.ready();
-const UID = tg.initDataUnsafe.user.id;
+/* 👤 USER UID */
+const uid = localStorage.getItem("uid") || Date.now().toString();
+localStorage.setItem("uid",uid);
 
-const reward = 0.05;
+const userRef = ref(db,"users/"+uid);
 
 /* INIT USER */
-const uref = ref(db,"users/"+UID);
-const snap = await get(uref);
+const snap = await get(userRef);
 if(!snap.exists()){
-  await set(uref,{balance:0,mSeen:0,aSeen:0});
+ set(userRef,{
+  balance:0,
+  banned:false
+ });
 }
 
-/* LIVE UPDATE */
-onValue(uref,(s)=>{
-  const d=s.val();
-  balanceFixed.innerText=d.balance.toFixed(2);
-  balance.innerText=d.balance.toFixed(2)+" ৳";
-  balance2.innerText=d.balance.toFixed(2)+" ৳";
-  mSeenEl.innerText=d.mSeen;
-  aSeenEl.innerText=d.aSeen;
+/* LIVE BALANCE */
+onValue(userRef,s=>{
+ if(!s.exists())return;
+ if(s.val().banned){
+  document.body.innerHTML="<h2 style='text-align:center;margin-top:80px'>🚫 You are banned</h2>";
+ }
+ document.getElementById("bal").innerText=(s.val().balance||0).toFixed(2)+" ৳";
+});
+
+/* SETTINGS */
+let adReward=0;
+let minWithdraw=50;
+
+onValue(ref(db,"settings/adReward"),s=>{
+ adReward = s.val()?.amount || 0;
+});
+onValue(ref(db,"settings/minWithdraw"),s=>{
+ minWithdraw = s.val() || 50;
 });
 
 /* ADS */
 window.watchMonetag=()=>{
-  show_10390731().then(()=>{
-    setTimeout(async ()=>{
-      const s=await get(uref);
-      await update(uref,{
-        balance:s.val().balance+reward,
-        mSeen:s.val().mSeen+1
-      });
-    },18000);
-  });
+ show_10390731().then(()=>addBalance());
+};
+window.watchAdexora=()=>{
+ showAdexora().then(()=>addBalance());
 };
 
-window.watchAdexora=()=>{
-  showAdexora().then(()=>{
-    setTimeout(async ()=>{
-      const s=await get(uref);
-      await update(uref,{
-        balance:s.val().balance+reward,
-        aSeen:s.val().aSeen+1
-      });
-    },18000);
-  });
-};
+async function addBalance(){
+ const s=await get(userRef);
+ update(userRef,{balance:(s.val().balance||0)+adReward});
+}
 
 /* WITHDRAW */
-window.withdraw=async ()=>{
-  if(!amount.value||!number.value){
-    toast("⚠️ সব তথ্য দিন");return;
-  }
-  const s=await get(uref);
-  if(s.val().balance<Number(amount.value)){
-    toast("⚠️ পর্যাপ্ত ব্যালেন্স নেই");return;
-  }
-  await update(uref,{balance:s.val().balance-Number(amount.value)});
-  await push(ref(db,"withdraws"),{
-    uid:UID,method:method.value,
-    number:number.value,
-    amount:Number(amount.value),
-    status:"pending",time:Date.now()
-  });
-  toast("✅ Withdraw Pending",1);
+window.withdraw=async()=>{
+ const amt=Number(amount.value);
+ if(!amt || amt<minWithdraw) return alert("Minimum "+minWithdraw+"৳");
+ const s=await get(userRef);
+ if(s.val().balance < amt) return alert("Insufficient balance");
+
+ update(userRef,{balance:s.val().balance-amt});
+ push(ref(db,"withdraws"),{
+  uid, amount:amt, method:method.value, status:"pending"
+ });
+ alert("Withdraw Submitted");
 };
 
-/* HISTORY */
-onValue(ref(db,"withdraws"),(sn)=>{
-  let h="";
-  sn.forEach(x=>{
-    const w=x.val();
-    if(w.uid!=UID)return;
-    h+=`${w.method} - ${w.amount}৳<br>Status: ${w.status}<hr>`;
-  });
-  historyBox.innerHTML=h||"<div class='small'>কোনো হিস্টোরি নেই</div>";
-});
-
-function toast(t,ok){
-  const x=document.getElementById("toast");
-  x.innerText=t;
-  x.style.background=ok?"#2e7d32":"#d32f2f";
-  x.style.display="block";
-  setTimeout(()=>x.style.display="none",2500);
-}
-</script>
-
-<script>
-function showTab(id){
-["home","earn","withdraw","history"].forEach(x=>document.getElementById(x).classList.add("hide"));
-document.getElementById(id).classList.remove("hide");
-}
+/* REF */
+window.copyRef=()=>{
+ const link="https://t.me/YOUR_BOT_USERNAME?start="+uid;
+ navigator.clipboard.writeText(link);
+ alert("Referral copied");
+};
 </script>
 
 </body>
