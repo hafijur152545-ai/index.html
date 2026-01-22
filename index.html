@@ -5,65 +5,106 @@
 <title>Earn Money Bot</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Ads -->
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+
 <script src="//libtl.com/sdk.js" data-zone="10390731" data-sdk="show_10390731"></script>
 <script src="https://adexora.com/cdn/ads.js?id=1551"></script>
 
 <style>
-body{margin:0;font-family:Arial;background:#f6f7fb}
-.header{background:#ff4fa3;color:#fff;padding:18px;text-align:center;font-size:20px}
-.card{background:#fff;margin:12px;padding:15px;border-radius:12px}
-.balance{font-size:28px;font-weight:bold;text-align:center}
-.btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:16px;color:#fff;margin-top:10px}
-.btn-m{background:#3f5bd8}
-.btn-a{background:#9c27b0}
-.btn-w{background:#28a745}
-.nav{position:fixed;bottom:0;left:0;width:100%;display:flex;background:#ff4fa3}
-.nav button{flex:1;padding:12px;border:none;background:none;color:#fff}
-input,select{width:100%;padding:10px;margin-top:8px}
-.small{font-size:13px;color:#555;text-align:center}
+body{margin:0;font-family:'Hind Siliguri',sans-serif;background:#f5f6fa}
+.header{background:linear-gradient(90deg,#ff4fa3,#8e44ad);color:#fff;padding:15px;text-align:center;font-weight:700}
+.balance{font-size:22px}
+.page{display:none;padding:15px}
+.page.active{display:block}
+.card{background:#fff;padding:15px;border-radius:14px;margin-bottom:12px}
+.btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:700}
+.btn-pink{background:#ff4fa3;color:#fff}
+.btn-purple{background:#8e44ad;color:#fff}
+.nav{position:fixed;bottom:0;left:0;width:100%;display:flex;background:#fff;border-top:1px solid #ddd}
+.nav button{flex:1;padding:10px;border:none;background:none;font-weight:700}
+.nav button.active{color:#ff4fa3}
+.small{font-size:12px;color:#555}
 </style>
 </head>
 
 <body>
 
-<div class="header">💰 Earn Money Bot</div>
-
-<div class="card">
-  <div class="balance" id="bal">0.00 ৳</div>
-  <div class="small">Total Balance</div>
+<div class="header">
+  💰 Earn Money Bot<br>
+  <span class="balance">Balance: <span id="bal">0</span> ৳</span>
 </div>
 
-<div class="card">
-  <button class="btn btn-m" onclick="watchMonetag()">📺 Watch Ad (Monetag)</button>
-  <button class="btn btn-a" onclick="watchAdexora()">📺 Watch Ad (Adexora)</button>
+<!-- HOME -->
+<div id="home" class="page active">
+  <div class="card">
+    📢 নিয়ম মেনে কাজ করলে ১০০% পেমেন্ট নিশ্চিত
+  </div>
+
+  <div class="card">
+    <b>Referral Program</b><br>
+    ১০% কমিশন পান<br><br>
+    <input id="reflink" readonly style="width:100%;padding:8px">
+    <button class="btn btn-pink" onclick="copyRef()">Copy Referral</button>
+  </div>
+
+  <div class="card">
+    <button class="btn btn-purple" onclick="window.open('https://t.me/hafijur152')">🎧 Support</button><br><br>
+    <button class="btn btn-pink" onclick="window.open('https://t.me/takariyel')">📢 Update Group</button>
+  </div>
 </div>
 
-<div class="card">
-  <select id="method">
-    <option>Bkash</option>
-    <option>Nagad</option>
-  </select>
-  <input id="number" placeholder="Payment Number">
-  <select id="amount">
-    <option value="">Withdraw Amount</option>
-    <option value="50">50</option>
-    <option value="100">100</option>
-    <option value="150">150</option>
-    <option value="200">200</option>
-  </select>
-  <button class="btn btn-w" onclick="withdraw()">Withdraw</button>
+<!-- EARN -->
+<div id="earn" class="page">
+  <div class="card">
+    <button class="btn btn-purple" onclick="watchMonetag()">📺 Watch Ad (Monetag)</button><br><br>
+    <button class="btn btn-pink" onclick="watchAdexora()">📺 Watch Ad (Adexora)</button>
+  </div>
+
+  <div class="card small">
+    আজকে দেখেছেন: <span id="watched">0</span> / 10
+  </div>
+
+  <div class="card small">
+    নিয়ম: ১০টা এড দেখুন, প্রতিটিতে ২০ সেকেন্ড অপেক্ষা করুন।
+  </div>
 </div>
 
+<!-- WITHDRAW -->
+<div id="withdraw" class="page">
+  <div class="card">
+    <select id="method" style="width:100%;padding:10px">
+      <option>Bkash</option>
+      <option>Nagad</option>
+    </select><br><br>
+    <input id="number" placeholder="Payment Number" style="width:100%;padding:10px"><br><br>
+    <select id="amount" style="width:100%;padding:10px">
+      <option value="50">50</option>
+      <option value="100">100</option>
+      <option value="200">200</option>
+    </select><br><br>
+    <button class="btn btn-pink" onclick="withdraw()">Withdraw</button>
+  </div>
+
+  <div class="card small">
+    Minimum Withdraw 50৳<br>
+    12–24 ঘন্টার মধ্যে পেমেন্ট দেওয়া হবে ইনশাআল্লাহ
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div id="history" class="page"></div>
+
+<!-- NAV -->
 <div class="nav">
-  <button onclick="location.reload()">Home</button>
-  <button onclick="copyRef()">Referral</button>
+  <button onclick="show('home')" class="active">Home</button>
+  <button onclick="show('earn')">Earn</button>
+  <button onclick="show('withdraw')">Withdraw</button>
+  <button onclick="show('history')">History</button>
 </div>
 
 <script type="module">
-/* 🔥 FIREBASE */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getDatabase, ref, get, set, update, push, onValue }
+import { getDatabase, ref, get, set, update, push, onValue } 
 from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -79,81 +120,59 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* 👤 USER */
 const uid = localStorage.getItem("uid") || Date.now().toString();
 localStorage.setItem("uid", uid);
-const userRef = ref(db, "users/" + uid);
 
+const userRef = ref(db,"users/"+uid);
 const snap = await get(userRef);
 if(!snap.exists()){
-  await set(userRef,{ balance:0, banned:false });
+ await set(userRef,{balance:0,ads:0});
 }
 
-/* LIVE BALANCE */
 onValue(userRef,s=>{
- if(s.val()?.banned){
-  document.body.innerHTML="<h2 style='text-align:center;margin-top:80px'>🚫 You are banned</h2>";
-  return;
- }
- document.getElementById("bal").innerText =
-  (s.val()?.balance || 0).toFixed(2)+" ৳";
+ document.getElementById("bal").innerText = s.val().balance || 0;
+ document.getElementById("watched").innerText = s.val().ads || 0;
 });
 
-/* SETTINGS */
-let adReward = 1;
-let minWithdraw = 50;
-
-onValue(ref(db,"settings/adReward"),s=>{
- adReward = s.val()?.amount || 1;
-});
-onValue(ref(db,"settings/minWithdraw"),s=>{
- minWithdraw = s.val() || 50;
-});
-
-/* 🔥 ADS – FIXED */
-window.watchMonetag = ()=>{
+window.watchMonetag=()=>{
  show_10390731();
- setTimeout(addBalance, 15000);
-};
-
-window.watchAdexora = ()=>{
+ setTimeout(addBalance,15000);
+}
+window.watchAdexora=()=>{
  showAdexora();
- setTimeout(addBalance, 15000);
-};
+ setTimeout(addBalance,15000);
+}
 
 async function addBalance(){
  const s = await get(userRef);
+ if((s.val().ads||0)>=10){alert("আজকের লিমিট শেষ");return;}
  await update(userRef,{
-  balance:(s.val().balance || 0) + adReward
+  balance:(s.val().balance||0)+1,
+  ads:(s.val().ads||0)+1
  });
 }
 
-/* 💸 WITHDRAW */
-window.withdraw = async()=>{
- const amt = Number(amount.value);
- if(!amt || amt < minWithdraw){
-  alert("Minimum " + minWithdraw + "৳");
-  return;
- }
- const s = await get(userRef);
- if(s.val().balance < amt){
-  alert("Insufficient balance");
-  return;
- }
+window.withdraw=async()=>{
+ const amt=Number(amount.value);
+ const s=await get(userRef);
+ if(s.val().balance<amt){alert("Balance কম");return;}
+ await update(userRef,{balance:s.val().balance-amt});
+ await push(ref(db,"withdraws"),{uid,amount:amt,method:method.value,status:"pending",time:Date.now()});
+ alert("Withdraw submitted");
+}
 
- await update(userRef,{ balance:s.val().balance - amt });
- await push(ref(db,"withdraws"),{
-  uid, amount:amt, method:method.value, status:"pending"
- });
- alert("Withdraw Submitted");
-};
-
-/* 🔗 REF */
-window.copyRef = ()=>{
- const link = "https://t.me/YOUR_BOT_USERNAME?start=" + uid;
+window.copyRef=()=>{
+ const link="https://t.me/maniriyel_bot?start="+uid;
  navigator.clipboard.writeText(link);
- alert("Referral copied");
-};
+ alert("Copied");
+}
+
+window.show=(id)=>{
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+ event.target.classList.add("active");
+}
 </script>
 
 </body>
