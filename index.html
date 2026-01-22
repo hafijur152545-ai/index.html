@@ -10,24 +10,19 @@
 <script src="https://adexora.com/cdn/ads.js?id=1551"></script>
 
 <style>
-body{margin:0;font-family:Arial;background:#f6f7fb;}
-.header{background:#ff4fa3;color:#fff;padding:18px;text-align:center;font-size:20px;}
-.fixed-balance{background:#fff;margin:10px;padding:10px;border-radius:10px;text-align:center;font-weight:bold;}
-.container{padding:15px;}
-.card{background:#fff;border-radius:12px;padding:15px;margin-bottom:15px;box-shadow:0 2px 6px rgba(0,0,0,.08);}
-.balance{font-size:28px;font-weight:bold;text-align:center;}
-.btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:16px;color:#fff;margin-top:10px;}
-.btn-monetag{background:#3f5bd8;}
-.btn-adexora{background:#9c27b0;}
-.btn-withdraw{background:#28a745;}
-.info{text-align:center;font-size:14px;margin-top:6px;}
-.small{font-size:12px;color:#555;text-align:center;}
-.nav{position:fixed;bottom:0;left:0;width:100%;display:flex;background:#ff4fa3;}
-.nav button{flex:1;padding:12px;border:none;background:none;color:#fff;}
-.hide{display:none;}
-input,select{width:100%;padding:10px;margin-top:8px;}
-.toast{display:none;position:fixed;top:15px;left:50%;transform:translateX(-50%);background:#d32f2f;color:#fff;padding:10px 18px;border-radius:20px;z-index:999;}
-.row{display:flex;gap:10px;}
+body{margin:0;font-family:Arial;background:#f6f7fb}
+.header{background:#ff4fa3;color:#fff;padding:18px;text-align:center;font-size:20px}
+.card{background:#fff;border-radius:12px;padding:15px;margin:12px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.balance{font-size:28px;font-weight:bold;text-align:center}
+.btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:16px;color:#fff;margin-top:10px}
+.btn-m{background:#3f5bd8}
+.btn-a{background:#9c27b0}
+.btn-w{background:#28a745}
+.nav{position:fixed;bottom:0;left:0;width:100%;display:flex;background:#ff4fa3}
+.nav button{flex:1;padding:12px;border:none;background:none;color:#fff}
+.hide{display:none}
+input,select{width:100%;padding:10px;margin-top:8px}
+.toast{display:none;position:fixed;top:15px;left:50%;transform:translateX(-50%);background:#d32f2f;color:#fff;padding:10px 18px;border-radius:20px;z-index:999}
 </style>
 </head>
 
@@ -36,59 +31,44 @@ input,select{width:100%;padding:10px;margin-top:8px;}
 <div class="toast" id="toast"></div>
 
 <div class="header">💰 Earn Money Bot</div>
-<div class="fixed-balance">Balance: <span id="balanceFixed">0.00</span> ৳</div>
 
-<!-- HOME -->
-<div class="container" id="home">
-  <div class="card">
-    <div class="balance" id="balance">0.00 ৳</div>
-    <div style="text-align:center;">Total Balance</div>
-  </div>
+<div class="card">
+  <div class="balance" id="balance">0.00 ৳</div>
+  <div style="text-align:center">Total Balance</div>
 </div>
 
-<!-- EARN -->
-<div class="container hide" id="earn">
-  <div class="card">
-    <div class="balance" id="balance2">0.00 ৳</div>
-  </div>
-
-  <div class="card">
-    <button class="btn btn-monetag" onclick="watchMonetag()">📺 Watch Ad (Monetag)</button>
-    <div class="info">দেখা হয়েছে: <span id="mSeen">0</span></div>
-
-    <button class="btn btn-adexora" onclick="watchAdexora()">📺 Watch Ad (Adexora)</button>
-    <div class="info">দেখা হয়েছে: <span id="aSeen">0</span></div>
-  </div>
+<div class="card">
+  <button class="btn btn-m" onclick="watchMonetag()">📺 Watch Ad (Monetag)</button>
+  <button class="btn btn-a" onclick="watchAdexora()">📺 Watch Ad (Adexora)</button>
 </div>
 
-<!-- WITHDRAW -->
-<div class="container hide" id="withdraw">
-  <div class="card">
-    <select id="method">
-      <option>Bkash</option>
-      <option>Nagad</option>
-    </select>
-    <input id="number" placeholder="Payment Number">
-    <select id="amount">
-      <option value="">Withdraw Amount</option>
-      <option>20</option>
-      <option>50</option>
-      <option>100</option>
-      <option>200</option>
-    </select>
-    <button class="btn btn-withdraw" onclick="withdraw()">Submit Withdraw</button>
-  </div>
+<div class="card">
+  <select id="method">
+    <option>Bkash</option>
+    <option>Nagad</option>
+  </select>
+  <input id="number" placeholder="Payment Number">
+  <select id="amount">
+    <option value="">Withdraw Amount</option>
+    <option value="20">20</option>
+    <option value="50">50</option>
+    <option value="100">100</option>
+    <option value="200">200</option>
+  </select>
+  <button class="btn btn-w" onclick="withdraw()">Submit Withdraw</button>
 </div>
 
 <div class="nav">
-  <button onclick="showTab('home')">Home</button>
-  <button onclick="showTab('earn')">Earn</button>
-  <button onclick="showTab('withdraw')">Withdraw</button>
+  <button onclick="showToast('Earn Section',true)">Home</button>
+  <button onclick="showToast('Watch Ads',true)">Earn</button>
+  <button onclick="showToast('Withdraw Section',true)">Withdraw</button>
 </div>
 
 <script type="module">
+/* 🔥 FIREBASE */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getDatabase, ref, get, set, update, push } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+import { getDatabase, ref, get, set, update, push }
+from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
 const firebaseConfig = {
  apiKey: "AIzaSyDYOXUgRTU9hFyQMR2o9FJupg8DwRpvTBA",
@@ -103,78 +83,80 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const uid = localStorage.getItem("uid") || Date.now().toString();
-localStorage.setItem("uid", uid);
+/* 👤 USER */
+const UID = localStorage.getItem("uid") || Date.now().toString();
+localStorage.setItem("uid", UID);
+const userRef = ref(db,"users/"+UID);
 
-let reward = 0;
 let balance = 0;
+let reward = 0;
 
+/* LOAD DATA */
 async function loadUser(){
- const s = await get(ref(db,"users/"+uid));
+ const s = await get(userRef);
  if(!s.exists()){
-  set(ref(db,"users/"+uid),{balance:0});
+  set(userRef,{balance:0,banned:false});
   balance = 0;
- } else {
+ }else{
   balance = s.val().balance || 0;
  }
- updateUI();
+ document.getElementById("balance").innerText = balance.toFixed(2)+" ৳";
 }
 loadUser();
 
+/* SETTINGS */
 async function loadSettings(){
- const s = await get(ref(db,"settings"));
- if(s.exists()){
-  reward = s.val().adReward?.amount || 0;
- }
+ const s = await get(ref(db,"settings/adReward"));
+ reward = s.val()?.amount || 0.05;
 }
 loadSettings();
 
-function updateUI(){
- balanceFixed.innerText = balance.toFixed(2);
- balance.innerText = balance.toFixed(2)+" ৳";
- balance2.innerText = balance.toFixed(2)+" ৳";
-}
-
+/* ADS */
 function watchMonetag(){
  show_10390731().then(()=>{
-  setTimeout(async()=>{
-   balance += reward;
-   await update(ref(db,"users/"+uid),{balance});
-   updateUI();
-  },18000);
+  setTimeout(addReward,18000);
  });
 }
-
 function watchAdexora(){
  showAdexora().then(()=>{
-  setTimeout(async()=>{
-   balance += reward;
-   await update(ref(db,"users/"+uid),{balance});
-   updateUI();
-  },18000);
+  setTimeout(addReward,18000);
  });
 }
+async function addReward(){
+ balance += reward;
+ update(userRef,{balance});
+ document.getElementById("balance").innerText = balance.toFixed(2)+" ৳";
+}
 
+/* WITHDRAW */
 async function withdraw(){
  const amt = Number(amount.value);
- const s = await get(ref(db,"settings/minWithdraw"));
- const min = s.val() || 0;
- if(amt < min) return alert("Minimum withdraw "+min+"৳");
- if(balance < amt) return alert("Insufficient balance");
+ if(!amt || balance < amt) return toast("❌ Balance কম");
+ if(!number.value) return toast("❌ নাম্বার দিন");
 
  balance -= amt;
- await update(ref(db,"users/"+uid),{balance});
- await push(ref(db,"withdraws"),{
-  uid, amount:amt, method:method.value, number:number.value, status:"pending"
+ update(userRef,{balance});
+
+ push(ref(db,"withdraws"),{
+  uid:UID,
+  method:method.value,
+  amount:amt,
+  status:"pending"
  });
- updateUI();
- alert("Withdraw submitted");
+
+ document.getElementById("balance").innerText = balance.toFixed(2)+" ৳";
+ toast("✅ Withdraw Submitted",true);
 }
 
-function showTab(id){
- ["home","earn","withdraw"].forEach(x=>document.getElementById(x).classList.add("hide"));
- document.getElementById(id).classList.remove("hide");
+/* TOAST */
+function toast(msg,ok=false){
+ const t=document.getElementById("toast");
+ t.innerText=msg;
+ t.style.background=ok?"#2e7d32":"#d32f2f";
+ t.style.display="block";
+ setTimeout(()=>t.style.display="none",2500);
 }
+window.showToast=toast;
 </script>
 
 </body>
