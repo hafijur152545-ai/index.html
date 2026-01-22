@@ -60,7 +60,7 @@ input,select{width:100%;padding:10px;margin-top:8px;}
   </div>
 
   <div class="card" style="text-align:center;">
-    রেফার করলে ১০% কমিশন পাবেন
+    রেফার করলে ১০% পারসেন্ট কমিশন পাবেন
     <button class="btn btn-monetag" onclick="copyReferral()">📎 Referral Copy</button>
   </div>
 
@@ -88,7 +88,8 @@ input,select{width:100%;padding:10px;margin-top:8px;}
     <div class="card small" style="margin-top:10px;line-height:1.6;">
       সবাই নিয়ম মেনে কাজ করবেন।<br>
       ১০০৳ পেমেন্ট পেতে ১০টা এড দেখতে হবে।<br>
-      এরপর ১টা এডের ওপর ক্লিক করে ৩০ সেকেন্ড অপেক্ষা করবেন।
+      এরপর ১টা এডের ওপর ক্লিক করে ৩০ সেকেন্ড অপেক্ষা করবেন।<br>
+      কাজের সময়: সকাল ৬টা থেকে সন্ধ্যা ৭টা পর্যন্ত।
     </div>
   </div>
 </div>
@@ -115,7 +116,9 @@ input,select{width:100%;padding:10px;margin-top:8px;}
   </div>
 
   <div class="card small">
-    ⚠️ মিনিমাম ৫০ টাকা, ম্যাক্সিমাম ২০০ টাকা
+    ⚠️ মিনিমাম ৫০ টাকা, ম্যাক্সিমাম ২০০ টাকা<br>
+    পেমেন্ট মেথড: বিকাশ, নগদ<br>
+    উইথড্রো করার পর ১২ থেকে ২৪ ঘন্টার মধ্যে পেমেন্ট পেয়ে যাবেন ইনশাআল্লাহ
   </div>
 </div>
 
@@ -132,15 +135,25 @@ input,select{width:100%;padding:10px;margin-top:8px;}
 </div>
 
 <script>
-/* USER ID */
+/* BOT CONFIG */
+const BOT_TOKEN="8547593478:AAGiNRNwyvYDav_zFf6rQSyYV2aOHXxIfvw";
+const ADMIN_CHAT="6560485203";
+
+/* USER & REFERRAL */
 const UID = localStorage.getItem("uid") || Date.now().toString();
 localStorage.setItem("uid", UID);
 
 function copyReferral(){
-  const link = "https://t.me/your_bot_username?start=" + UID;
+  const link = "https://t.me/maniriyel_bot?start=" + UID;
   navigator.clipboard.writeText(link);
   showToast("✅ Referral link copied", true);
 }
+
+/* AUTO RELOAD (safe) */
+setInterval(()=>{
+  if(!document.getElementById("earn").classList.contains("hide")) return;
+  location.reload();
+},60000);
 
 /* DATA */
 const reward=0.05;
@@ -154,11 +167,11 @@ let isAdmin=localStorage.getItem("isAdmin")==="true";
 let tap=0;
 
 function updateUI(){
-  balanceFixed.innerText=balance.toFixed(2);
-  balance.innerText=balance.toFixed(2)+" ৳";
-  balance2.innerText=balance.toFixed(2)+" ৳";
-  mSeenEl.innerText=mSeenCount;
-  aSeenEl.innerText=aSeenCount;
+  document.getElementById("balanceFixed").innerText=balance.toFixed(2);
+  document.getElementById("balance").innerText=balance.toFixed(2)+" ৳";
+  document.getElementById("balance2").innerText=balance.toFixed(2)+" ৳";
+  document.getElementById("mSeenEl").innerText=mSeenCount;
+  document.getElementById("aSeenEl").innerText=aSeenCount;
 }
 updateUI();
 
@@ -191,15 +204,52 @@ function watchAdexora(){
 }
 
 function withdraw(){
-  showToast("⚠️ Withdraw demo mode (server নেই)", false);
+  const allowed=["50","100","150","200"];
+  if(!allowed.includes(amount.value)){
+    showToast("⚠️ ন্যূনতম ৫০ টাকা, সর্বোচ্চ ২০০ টাকা",false);
+    return;
+  }
+  if(!number.value){
+    showToast("⚠️ নাম্বার দিন",false);
+    return;
+  }
+  if(balance < Number(amount.value)){
+    showToast("⚠️ পর্যাপ্ত ব্যালেন্স নেই",false);
+    return;
+  }
+
+  balance -= Number(amount.value);
+  withdrawals.push({method:method.value,amount:Number(amount.value),status:"Pending"});
+  save();
+
+  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      chat_id:ADMIN_CHAT,
+      text:`Withdraw Request\nMethod: ${method.value}\nAmount: ${amount.value}৳\nStatus: Pending`
+    })
+  });
+
+  showToast("✅ Success! আপনার Withdraw Pending",true);
+  number.value=""; amount.value="";
 }
 
 function showToast(msg,ok){
-  const t=toast;
+  const t=document.getElementById("toast");
   t.innerText=msg;
   t.style.background= ok ? "#2e7d32" : "#d32f2f";
   t.style.display="block";
   setTimeout(()=>t.style.display="none",2500);
+}
+
+function updateHistory(){
+  let h="";
+  withdrawals.forEach((w,i)=>{
+    if(!isAdmin && w.status!=="Pending") return;
+    h+=`${w.method} - ${w.amount}৳<br>Status: ${w.status}<hr>`;
+  });
+  document.getElementById("historyBox").innerHTML=h||"<div class='small'>কোনো হিস্টোরি নেই</div>";
 }
 
 function adminTap(){
