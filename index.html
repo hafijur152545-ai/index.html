@@ -11,7 +11,7 @@
 
 <style>
 body{margin:0;font-family:Arial;background:#f6f7fb;}
-.header{background:#ff4fa3;color:#fff;padding:18px;text-align:center;font-size:20px;position:relative;}
+.header{background:#ff4fa3;color:#fff;padding:18px;text-align:center;font-size:20px;}
 .fixed-balance{background:#fff;margin:10px;padding:10px;border-radius:10px;text-align:center;font-weight:bold;}
 .container{padding:15px;}
 .card{background:#fff;border-radius:12px;padding:15px;margin-bottom:15px;box-shadow:0 2px 6px rgba(0,0,0,.08);}
@@ -20,12 +20,14 @@ body{margin:0;font-family:Arial;background:#f6f7fb;}
 .btn-monetag{background:#3f5bd8;}
 .btn-adexora{background:#9c27b0;}
 .btn-withdraw{background:#28a745;}
+.info{text-align:center;font-size:14px;margin-top:6px;}
 .small{font-size:12px;color:#555;text-align:center;}
 .nav{position:fixed;bottom:0;left:0;width:100%;display:flex;background:#ff4fa3;}
 .nav button{flex:1;padding:12px;border:none;background:none;color:#fff;}
 .hide{display:none;}
 input,select{width:100%;padding:10px;margin-top:8px;}
 .toast{display:none;position:fixed;top:15px;left:50%;transform:translateX(-50%);background:#d32f2f;color:#fff;padding:10px 18px;border-radius:20px;z-index:999;}
+.row{display:flex;gap:10px;}
 </style>
 </head>
 
@@ -47,8 +49,15 @@ input,select{width:100%;padding:10px;margin-top:8px;}
 <!-- EARN -->
 <div class="container hide" id="earn">
   <div class="card">
+    <div class="balance" id="balance2">0.00 ৳</div>
+  </div>
+
+  <div class="card">
     <button class="btn btn-monetag" onclick="watchMonetag()">📺 Watch Ad (Monetag)</button>
+    <div class="info">দেখা হয়েছে: <span id="mSeen">0</span></div>
+
     <button class="btn btn-adexora" onclick="watchAdexora()">📺 Watch Ad (Adexora)</button>
+    <div class="info">দেখা হয়েছে: <span id="aSeen">0</span></div>
   </div>
 </div>
 
@@ -62,10 +71,10 @@ input,select{width:100%;padding:10px;margin-top:8px;}
     <input id="number" placeholder="Payment Number">
     <select id="amount">
       <option value="">Withdraw Amount</option>
-      <option value="20">20</option>
-      <option value="50">50</option>
-      <option value="100">100</option>
-      <option value="200">200</option>
+      <option>20</option>
+      <option>50</option>
+      <option>100</option>
+      <option>200</option>
     </select>
     <button class="btn btn-withdraw" onclick="withdraw()">Submit Withdraw</button>
   </div>
@@ -77,51 +86,60 @@ input,select{width:100%;padding:10px;margin-top:8px;}
   <button onclick="showTab('withdraw')">Withdraw</button>
 </div>
 
-<!-- 🔥 FIREBASE + LOGIC -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getDatabase, ref, get, set, push, update }
-from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+import { getDatabase, ref, get, set, update, push } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDBSUP7tfK5IlvEEoDm3qwkMhH6MU8Q3jE",
-  authDomain: "maniriyelbot0.firebaseapp.com",
-  databaseURL: "https://maniriyelbot0-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "maniriyelbot0",
-  storageBucket: "maniriyelbot0.firebasestorage.app",
-  messagingSenderId: "386824179846",
-  appId: "1:386824179846:web:e6eadd434a3151e48e0107"
+ apiKey: "AIzaSyDYOXUgRTU9hFyQMR2o9FJupg8DwRpvTBA",
+ authDomain: "telegram-bot-system-133d4.firebaseapp.com",
+ databaseURL: "https://telegram-bot-system-133d4-default-rtdb.europe-west1.firebasedatabase.app",
+ projectId: "telegram-bot-system-133d4",
+ storageBucket: "telegram-bot-system-133d4.appspot.com",
+ messagingSenderId: "367398716302",
+ appId: "1:367398716302:web:43e91f145277f50313dadf"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const UID = localStorage.getItem("uid") || Date.now().toString();
-localStorage.setItem("uid", UID);
+const uid = localStorage.getItem("uid") || Date.now().toString();
+localStorage.setItem("uid", uid);
 
-const userRef = ref(db,"users/"+UID);
-
+let reward = 0;
 let balance = 0;
-const reward = 0.05;
 
 async function loadUser(){
- const s = await get(userRef);
- if(s.exists()) balance = s.val().balance || 0;
- else await set(userRef,{balance:0,banned:false});
+ const s = await get(ref(db,"users/"+uid));
+ if(!s.exists()){
+  set(ref(db,"users/"+uid),{balance:0});
+  balance = 0;
+ } else {
+  balance = s.val().balance || 0;
+ }
  updateUI();
 }
 loadUser();
 
+async function loadSettings(){
+ const s = await get(ref(db,"settings"));
+ if(s.exists()){
+  reward = s.val().adReward?.amount || 0;
+ }
+}
+loadSettings();
+
 function updateUI(){
  balanceFixed.innerText = balance.toFixed(2);
- balanceEl.innerText = balance.toFixed(2)+" ৳";
+ balance.innerText = balance.toFixed(2)+" ৳";
+ balance2.innerText = balance.toFixed(2)+" ৳";
 }
 
 function watchMonetag(){
  show_10390731().then(()=>{
-  setTimeout(()=>{
-   balance+=reward;
-   update(userRef,{balance});
+  setTimeout(async()=>{
+   balance += reward;
+   await update(ref(db,"users/"+uid),{balance});
    updateUI();
   },18000);
  });
@@ -129,26 +147,28 @@ function watchMonetag(){
 
 function watchAdexora(){
  showAdexora().then(()=>{
-  setTimeout(()=>{
-   balance+=reward;
-   update(userRef,{balance});
+  setTimeout(async()=>{
+   balance += reward;
+   await update(ref(db,"users/"+uid),{balance});
    updateUI();
   },18000);
  });
 }
 
 async function withdraw(){
- if(balance < Number(amount.value)) return alert("Balance low");
- balance -= Number(amount.value);
- update(userRef,{balance});
- push(ref(db,"withdraws"),{
-  uid:UID,
-  method:method.value,
-  amount:Number(amount.value),
-  status:"pending"
+ const amt = Number(amount.value);
+ const s = await get(ref(db,"settings/minWithdraw"));
+ const min = s.val() || 0;
+ if(amt < min) return alert("Minimum withdraw "+min+"৳");
+ if(balance < amt) return alert("Insufficient balance");
+
+ balance -= amt;
+ await update(ref(db,"users/"+uid),{balance});
+ await push(ref(db,"withdraws"),{
+  uid, amount:amt, method:method.value, number:number.value, status:"pending"
  });
- alert("Withdraw Pending");
  updateUI();
+ alert("Withdraw submitted");
 }
 
 function showTab(id){
