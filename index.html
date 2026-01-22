@@ -4,71 +4,54 @@
 <meta charset="UTF-8">
 <title>Earn Money Bot</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- Ads -->
-<script src="//libtl.com/sdk.js" data-zone="10390731" data-sdk="show_10390731"></script>
-<script src="https://adexora.com/cdn/ads.js?id=1551"></script>
-
 <style>
-body{margin:0;font-family:Arial;background:#f6f7fb}
-.header{background:#ff4fa3;color:#fff;padding:18px;text-align:center;font-size:20px}
-.card{background:#fff;border-radius:12px;padding:15px;margin:12px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
-.balance{font-size:28px;font-weight:bold;text-align:center}
-.btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:16px;color:#fff;margin-top:10px}
-.btn-m{background:#3f5bd8}
-.btn-a{background:#9c27b0}
-.btn-w{background:#28a745}
-.nav{position:fixed;bottom:0;left:0;width:100%;display:flex;background:#ff4fa3}
-.nav button{flex:1;padding:12px;border:none;background:none;color:#fff}
-.hide{display:none}
-input,select{width:100%;padding:10px;margin-top:8px}
-.toast{display:none;position:fixed;top:15px;left:50%;transform:translateX(-50%);background:#d32f2f;color:#fff;padding:10px 18px;border-radius:20px;z-index:999}
+body{font-family:Arial;background:#f2f3f7;margin:0}
+.header{background:#ff4fa3;color:#fff;padding:15px;text-align:center;font-size:20px}
+.card{background:#fff;margin:12px;padding:15px;border-radius:12px;text-align:center}
+.btn{background:#ff4fa3;color:#fff;border:none;padding:12px;width:100%;border-radius:8px;font-size:16px;margin-top:10px}
+.btn:disabled{background:#aaa}
+.nav{position:fixed;bottom:0;left:0;right:0;display:flex}
+.nav button{flex:1;border:none;padding:14px;font-size:16px}
 </style>
 </head>
 
 <body>
 
-<div class="toast" id="toast"></div>
-
 <div class="header">💰 Earn Money Bot</div>
 
 <div class="card">
-  <div class="balance" id="balance">0.00 ৳</div>
-  <div style="text-align:center">Total Balance</div>
+<h3>Balance</h3>
+<h1 id="balance">0 ৳</h1>
 </div>
 
 <div class="card">
-  <button class="btn btn-m" onclick="watchMonetag()">📺 Watch Ad (Monetag)</button>
-  <button class="btn btn-a" onclick="watchAdexora()">📺 Watch Ad (Adexora)</button>
+<button class="btn" id="adBtn">🎥 Watch Ad</button>
+<p id="adStatus"></p>
 </div>
 
 <div class="card">
-  <select id="method">
-    <option>Bkash</option>
-    <option>Nagad</option>
-  </select>
-  <input id="number" placeholder="Payment Number">
-  <select id="amount">
-    <option value="">Withdraw Amount</option>
-    <option value="20">20</option>
-    <option value="50">50</option>
-    <option value="100">100</option>
-    <option value="200">200</option>
-  </select>
-  <button class="btn btn-w" onclick="withdraw()">Submit Withdraw</button>
+<input id="withdrawAmount" type="number" placeholder="Withdraw Amount">
+<button class="btn" id="withdrawBtn">💸 Withdraw</button>
+<p id="withdrawStatus"></p>
 </div>
 
 <div class="nav">
-  <button onclick="showToast('Earn Section',true)">Home</button>
-  <button onclick="showToast('Watch Ads',true)">Earn</button>
-  <button onclick="showToast('Withdraw Section',true)">Withdraw</button>
+<button>Home</button>
+<button>Earn</button>
+<button>Withdraw</button>
 </div>
 
 <script type="module">
+/* 🔥 TELEGRAM USER ID */
+const tg = window.Telegram.WebApp;
+tg.ready();
+const uid = String(tg.initDataUnsafe.user.id);
+
 /* 🔥 FIREBASE */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getDatabase, ref, get, set, update, push }
-from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+import {
+ getDatabase, ref, onValue, get, update, push
+} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
 const firebaseConfig = {
  apiKey: "AIzaSyDYOXUgRTU9hFyQMR2o9FJupg8DwRpvTBA",
@@ -83,80 +66,66 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* 👤 USER */
-const UID = localStorage.getItem("uid") || Date.now().toString();
-localStorage.setItem("uid", UID);
-const userRef = ref(db,"users/"+UID);
-
-let balance = 0;
-let reward = 0;
-
-/* LOAD DATA */
-async function loadUser(){
- const s = await get(userRef);
- if(!s.exists()){
-  set(userRef,{balance:0,banned:false});
-  balance = 0;
- }else{
-  balance = s.val().balance || 0;
+/* 🔒 BOT STATUS */
+onValue(ref(db,"settings/bot"),s=>{
+ if(s.val()==="off"){
+  document.body.innerHTML="<h2 style='text-align:center;margin-top:100px'>🚫 Bot is OFF</h2>";
  }
- document.getElementById("balance").innerText = balance.toFixed(2)+" ৳";
-}
-loadUser();
+});
 
-/* SETTINGS */
-async function loadSettings(){
- const s = await get(ref(db,"settings/adReward"));
- reward = s.val()?.amount || 0.05;
-}
-loadSettings();
+/* 👤 USER INIT */
+const userRef = ref(db,"users/"+uid);
+get(userRef).then(s=>{
+ if(!s.exists()){
+  update(userRef,{balance:0,banned:false});
+ }
+});
 
-/* ADS */
-function watchMonetag(){
- show_10390731().then(()=>{
-  setTimeout(addReward,18000);
+/* 🚫 BAN CHECK */
+onValue(ref(db,"users/"+uid+"/banned"),s=>{
+ if(s.val()===true){
+  document.body.innerHTML="<h2 style='text-align:center;margin-top:100px'>🚫 You are banned</h2>";
+ }
+});
+
+/* 💰 BALANCE */
+onValue(ref(db,"users/"+uid+"/balance"),s=>{
+ balance.innerText=(s.val()||0)+" ৳";
+});
+
+/* 📢 AD */
+let adAmount=0, adOn=false;
+onValue(ref(db,"settings/adReward"),s=>{
+ const d=s.val()||{};
+ adAmount=d.amount||0;
+ adOn=d.status==="on";
+ adBtn.disabled=!adOn;
+ adStatus.innerText=adOn?"Reward: "+adAmount+"৳":"Ads OFF";
+});
+
+adBtn.onclick=async()=>{
+ if(!adOn)return;
+ const balSnap=await get(ref(db,"users/"+uid+"/balance"));
+ const bal=balSnap.val()||0;
+ update(ref(db,"users/"+uid),{balance:bal+adAmount});
+};
+
+/* 💸 WITHDRAW */
+let minWithdraw=0;
+onValue(ref(db,"settings/minWithdraw"),s=>minWithdraw=s.val()||0);
+
+withdrawBtn.onclick=async()=>{
+ const amt=Number(withdrawAmount.value);
+ const bal=(await get(ref(db,"users/"+uid+"/balance"))).val()||0;
+ if(amt<minWithdraw){withdrawStatus.innerText="❌ Min "+minWithdraw+"৳";return;}
+ if(amt>bal){withdrawStatus.innerText="❌ Insufficient balance";return;}
+
+ await push(ref(db,"withdraws"),{
+  uid, amount:amt, status:"pending"
  });
-}
-function watchAdexora(){
- showAdexora().then(()=>{
-  setTimeout(addReward,18000);
- });
-}
-async function addReward(){
- balance += reward;
- update(userRef,{balance});
- document.getElementById("balance").innerText = balance.toFixed(2)+" ৳";
-}
-
-/* WITHDRAW */
-async function withdraw(){
- const amt = Number(amount.value);
- if(!amt || balance < amt) return toast("❌ Balance কম");
- if(!number.value) return toast("❌ নাম্বার দিন");
-
- balance -= amt;
- update(userRef,{balance});
-
- push(ref(db,"withdraws"),{
-  uid:UID,
-  method:method.value,
-  amount:amt,
-  status:"pending"
- });
-
- document.getElementById("balance").innerText = balance.toFixed(2)+" ৳";
- toast("✅ Withdraw Submitted",true);
-}
-
-/* TOAST */
-function toast(msg,ok=false){
- const t=document.getElementById("toast");
- t.innerText=msg;
- t.style.background=ok?"#2e7d32":"#d32f2f";
- t.style.display="block";
- setTimeout(()=>t.style.display="none",2500);
-}
-window.showToast=toast;
+ update(ref(db,"users/"+uid),{balance:bal-amt});
+ withdrawStatus.innerText="✅ Request sent";
+};
 </script>
 
 </body>
