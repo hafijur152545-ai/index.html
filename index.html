@@ -10,144 +10,151 @@
 <script src="https://adexora.com/cdn/ads.js?id=1551"></script>
 
 <style>
-body{margin:0;font-family:Arial;background:#f6f7fb}
-.header{background:#ff4fa3;color:#fff;padding:18px;text-align:center;font-size:20px}
-.card{background:#fff;margin:12px;padding:15px;border-radius:12px}
-.balance{font-size:28px;font-weight:bold;text-align:center}
-.btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:16px;color:#fff;margin-top:10px}
-.btn-m{background:#3f5bd8}
-.btn-a{background:#9c27b0}
-.btn-w{background:#28a745}
-.nav{position:fixed;bottom:0;left:0;width:100%;display:flex;background:#ff4fa3}
-.nav button{flex:1;padding:12px;border:none;background:none;color:#fff}
-.hide{display:none}
-input,select{width:100%;padding:10px;margin-top:8px}
-.small{font-size:13px;color:#555;text-align:center}
+body{margin:0;font-family:Arial;background:#f6f7fb;}
+.header{background:#ff4fa3;color:#fff;padding:18px;text-align:center;font-size:20px;position:relative;}
+.fixed-balance{background:#fff;margin:10px;padding:10px;border-radius:10px;text-align:center;font-weight:bold;}
+.container{padding:15px;}
+.card{background:#fff;border-radius:12px;padding:15px;margin-bottom:15px;box-shadow:0 2px 6px rgba(0,0,0,.08);}
+.balance{font-size:28px;font-weight:bold;text-align:center;}
+.btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:16px;color:#fff;margin-top:10px;}
+.btn-monetag{background:#3f5bd8;}
+.btn-adexora{background:#9c27b0;}
+.btn-withdraw{background:#28a745;}
+.small{font-size:12px;color:#555;text-align:center;}
+.nav{position:fixed;bottom:0;left:0;width:100%;display:flex;background:#ff4fa3;}
+.nav button{flex:1;padding:12px;border:none;background:none;color:#fff;}
+.hide{display:none;}
+input,select{width:100%;padding:10px;margin-top:8px;}
+.toast{display:none;position:fixed;top:15px;left:50%;transform:translateX(-50%);background:#d32f2f;color:#fff;padding:10px 18px;border-radius:20px;z-index:999;}
 </style>
 </head>
 
 <body>
 
+<div class="toast" id="toast"></div>
+
 <div class="header">💰 Earn Money Bot</div>
+<div class="fixed-balance">Balance: <span id="balanceFixed">0.00</span> ৳</div>
 
-<div class="card">
-  <div class="balance" id="bal">0.00 ৳</div>
-  <div class="small">Total Balance</div>
+<!-- HOME -->
+<div class="container" id="home">
+  <div class="card">
+    <div class="balance" id="balance">0.00 ৳</div>
+    <div style="text-align:center;">Total Balance</div>
+  </div>
 </div>
 
-<div class="card">
-  <button class="btn btn-m" onclick="watchMonetag()">📺 Watch Ad (Monetag)</button>
-  <button class="btn btn-a" onclick="watchAdexora()">📺 Watch Ad (Adexora)</button>
+<!-- EARN -->
+<div class="container hide" id="earn">
+  <div class="card">
+    <button class="btn btn-monetag" onclick="watchMonetag()">📺 Watch Ad (Monetag)</button>
+    <button class="btn btn-adexora" onclick="watchAdexora()">📺 Watch Ad (Adexora)</button>
+  </div>
 </div>
 
-<div class="card">
-  <select id="method">
-    <option>Bkash</option>
-    <option>Nagad</option>
-  </select>
-  <input id="number" placeholder="Payment Number">
-  <select id="amount">
-    <option value="">Withdraw Amount</option>
-    <option value="50">50</option>
-    <option value="100">100</option>
-    <option value="150">150</option>
-    <option value="200">200</option>
-  </select>
-  <button class="btn btn-w" onclick="withdraw()">Withdraw</button>
+<!-- WITHDRAW -->
+<div class="container hide" id="withdraw">
+  <div class="card">
+    <select id="method">
+      <option>Bkash</option>
+      <option>Nagad</option>
+    </select>
+    <input id="number" placeholder="Payment Number">
+    <select id="amount">
+      <option value="">Withdraw Amount</option>
+      <option value="20">20</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+      <option value="200">200</option>
+    </select>
+    <button class="btn btn-withdraw" onclick="withdraw()">Submit Withdraw</button>
+  </div>
 </div>
 
 <div class="nav">
-  <button onclick="location.reload()">Home</button>
-  <button onclick="copyRef()">Referral</button>
+  <button onclick="showTab('home')">Home</button>
+  <button onclick="showTab('earn')">Earn</button>
+  <button onclick="showTab('withdraw')">Withdraw</button>
 </div>
 
+<!-- 🔥 FIREBASE + LOGIC -->
 <script type="module">
-/* 🔥 FIREBASE */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getDatabase, ref, get, set, update, push, onValue }
+import { getDatabase, ref, get, set, push, update }
 from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
 const firebaseConfig = {
- apiKey: "AIzaSyDYOXUgRTU9hFyQMR2o9FJupg8DwRpvTBA",
- authDomain: "telegram-bot-system-133d4.firebaseapp.com",
- databaseURL: "https://telegram-bot-system-133d4-default-rtdb.europe-west1.firebasedatabase.app",
- projectId: "telegram-bot-system-133d4",
- storageBucket: "telegram-bot-system-133d4.appspot.com",
- messagingSenderId: "367398716302",
- appId: "1:367398716302:web:43e91f145277f50313dadf"
+  apiKey: "AIzaSyDBSUP7tfK5IlvEEoDm3qwkMhH6MU8Q3jE",
+  authDomain: "maniriyelbot0.firebaseapp.com",
+  databaseURL: "https://maniriyelbot0-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "maniriyelbot0",
+  storageBucket: "maniriyelbot0.firebasestorage.app",
+  messagingSenderId: "386824179846",
+  appId: "1:386824179846:web:e6eadd434a3151e48e0107"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* 👤 USER UID */
-const uid = localStorage.getItem("uid") || Date.now().toString();
-localStorage.setItem("uid",uid);
+const UID = localStorage.getItem("uid") || Date.now().toString();
+localStorage.setItem("uid", UID);
 
-const userRef = ref(db,"users/"+uid);
+const userRef = ref(db,"users/"+UID);
 
-/* INIT USER */
-const snap = await get(userRef);
-if(!snap.exists()){
- set(userRef,{
-  balance:0,
-  banned:false
+let balance = 0;
+const reward = 0.05;
+
+async function loadUser(){
+ const s = await get(userRef);
+ if(s.exists()) balance = s.val().balance || 0;
+ else await set(userRef,{balance:0,banned:false});
+ updateUI();
+}
+loadUser();
+
+function updateUI(){
+ balanceFixed.innerText = balance.toFixed(2);
+ balanceEl.innerText = balance.toFixed(2)+" ৳";
+}
+
+function watchMonetag(){
+ show_10390731().then(()=>{
+  setTimeout(()=>{
+   balance+=reward;
+   update(userRef,{balance});
+   updateUI();
+  },18000);
  });
 }
 
-/* LIVE BALANCE */
-onValue(userRef,s=>{
- if(!s.exists())return;
- if(s.val().banned){
-  document.body.innerHTML="<h2 style='text-align:center;margin-top:80px'>🚫 You are banned</h2>";
- }
- document.getElementById("bal").innerText=(s.val().balance||0).toFixed(2)+" ৳";
-});
-
-/* SETTINGS */
-let adReward=0;
-let minWithdraw=50;
-
-onValue(ref(db,"settings/adReward"),s=>{
- adReward = s.val()?.amount || 0;
-});
-onValue(ref(db,"settings/minWithdraw"),s=>{
- minWithdraw = s.val() || 50;
-});
-
-/* ADS */
-window.watchMonetag=()=>{
- show_10390731().then(()=>addBalance());
-};
-window.watchAdexora=()=>{
- showAdexora().then(()=>addBalance());
-};
-
-async function addBalance(){
- const s=await get(userRef);
- update(userRef,{balance:(s.val().balance||0)+adReward});
+function watchAdexora(){
+ showAdexora().then(()=>{
+  setTimeout(()=>{
+   balance+=reward;
+   update(userRef,{balance});
+   updateUI();
+  },18000);
+ });
 }
 
-/* WITHDRAW */
-window.withdraw=async()=>{
- const amt=Number(amount.value);
- if(!amt || amt<minWithdraw) return alert("Minimum "+minWithdraw+"৳");
- const s=await get(userRef);
- if(s.val().balance < amt) return alert("Insufficient balance");
-
- update(userRef,{balance:s.val().balance-amt});
+async function withdraw(){
+ if(balance < Number(amount.value)) return alert("Balance low");
+ balance -= Number(amount.value);
+ update(userRef,{balance});
  push(ref(db,"withdraws"),{
-  uid, amount:amt, method:method.value, status:"pending"
+  uid:UID,
+  method:method.value,
+  amount:Number(amount.value),
+  status:"pending"
  });
- alert("Withdraw Submitted");
-};
+ alert("Withdraw Pending");
+ updateUI();
+}
 
-/* REF */
-window.copyRef=()=>{
- const link="https://t.me/YOUR_BOT_USERNAME?start="+uid;
- navigator.clipboard.writeText(link);
- alert("Referral copied");
-};
+function showTab(id){
+ ["home","earn","withdraw"].forEach(x=>document.getElementById(x).classList.add("hide"));
+ document.getElementById(id).classList.remove("hide");
+}
 </script>
 
 </body>
