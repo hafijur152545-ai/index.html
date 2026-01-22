@@ -20,7 +20,6 @@ body{margin:0;font-family:Arial;background:#f6f7fb}
 .btn-w{background:#28a745}
 .nav{position:fixed;bottom:0;left:0;width:100%;display:flex;background:#ff4fa3}
 .nav button{flex:1;padding:12px;border:none;background:none;color:#fff}
-.hide{display:none}
 input,select{width:100%;padding:10px;margin-top:8px}
 .small{font-size:13px;color:#555;text-align:center}
 </style>
@@ -80,71 +79,78 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* 👤 USER UID */
+/* 👤 USER */
 const uid = localStorage.getItem("uid") || Date.now().toString();
-localStorage.setItem("uid",uid);
+localStorage.setItem("uid", uid);
+const userRef = ref(db, "users/" + uid);
 
-const userRef = ref(db,"users/"+uid);
-
-/* INIT USER */
 const snap = await get(userRef);
 if(!snap.exists()){
- set(userRef,{
-  balance:0,
-  banned:false
- });
+  await set(userRef,{ balance:0, banned:false });
 }
 
 /* LIVE BALANCE */
 onValue(userRef,s=>{
- if(!s.exists())return;
- if(s.val().banned){
+ if(s.val()?.banned){
   document.body.innerHTML="<h2 style='text-align:center;margin-top:80px'>🚫 You are banned</h2>";
+  return;
  }
- document.getElementById("bal").innerText=(s.val().balance||0).toFixed(2)+" ৳";
+ document.getElementById("bal").innerText =
+  (s.val()?.balance || 0).toFixed(2)+" ৳";
 });
 
 /* SETTINGS */
-let adReward=0;
-let minWithdraw=50;
+let adReward = 1;
+let minWithdraw = 50;
 
 onValue(ref(db,"settings/adReward"),s=>{
- adReward = s.val()?.amount || 0;
+ adReward = s.val()?.amount || 1;
 });
 onValue(ref(db,"settings/minWithdraw"),s=>{
  minWithdraw = s.val() || 50;
 });
 
-/* ADS */
-window.watchMonetag=()=>{
- show_10390731().then(()=>addBalance());
+/* 🔥 ADS – FIXED */
+window.watchMonetag = ()=>{
+ show_10390731();
+ setTimeout(addBalance, 15000);
 };
-window.watchAdexora=()=>{
- showAdexora().then(()=>addBalance());
+
+window.watchAdexora = ()=>{
+ showAdexora();
+ setTimeout(addBalance, 15000);
 };
 
 async function addBalance(){
- const s=await get(userRef);
- update(userRef,{balance:(s.val().balance||0)+adReward});
+ const s = await get(userRef);
+ await update(userRef,{
+  balance:(s.val().balance || 0) + adReward
+ });
 }
 
-/* WITHDRAW */
-window.withdraw=async()=>{
- const amt=Number(amount.value);
- if(!amt || amt<minWithdraw) return alert("Minimum "+minWithdraw+"৳");
- const s=await get(userRef);
- if(s.val().balance < amt) return alert("Insufficient balance");
+/* 💸 WITHDRAW */
+window.withdraw = async()=>{
+ const amt = Number(amount.value);
+ if(!amt || amt < minWithdraw){
+  alert("Minimum " + minWithdraw + "৳");
+  return;
+ }
+ const s = await get(userRef);
+ if(s.val().balance < amt){
+  alert("Insufficient balance");
+  return;
+ }
 
- update(userRef,{balance:s.val().balance-amt});
- push(ref(db,"withdraws"),{
+ await update(userRef,{ balance:s.val().balance - amt });
+ await push(ref(db,"withdraws"),{
   uid, amount:amt, method:method.value, status:"pending"
  });
  alert("Withdraw Submitted");
 };
 
-/* REF */
-window.copyRef=()=>{
- const link="https://t.me/YOUR_BOT_USERNAME?start="+uid;
+/* 🔗 REF */
+window.copyRef = ()=>{
+ const link = "https://t.me/YOUR_BOT_USERNAME?start=" + uid;
  navigator.clipboard.writeText(link);
  alert("Referral copied");
 };
