@@ -25,7 +25,6 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 .btn-ad { background: linear-gradient(45deg, #6c5ce7, #a29bfe); color:#fff; font-size:18px; }
 .btn-vpn { background:#2ecc71; color:#fff; width:fit-content; margin:15px auto; display:block; padding: 10px 30px; border-radius:50px; }
 
-/* Custom Circular Buttons */
 .btn-round { display: inline-flex; width: 45%; height: 50px; align-items: center; justify-content: center; border-radius: 50px; color: #fff; text-decoration: none; font-weight: bold; font-size: 14px; margin: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 .bg-blue { background: #3498db; }
 .bg-green { background: #27ae60; }
@@ -38,13 +37,11 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 .status-pending { border-left-color: #f1c40f; } .status-paid { border-left-color: #2ecc71; } .status-rejected { border-left-color: #e74c3c; }
 #blocker { position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; box-sizing:border-box; }
 
-/* Notice Style */
 .notice-box { background: #fff; padding: 10px; border-radius: 10px; border-left: 4px solid var(--primary); margin-top: 10px; font-size: 14px; line-height: 1.5; color: #555; }
 </style>
 </head>
 <body>
 
-<!-- Block screen for Banned/Bot Off -->
 <div id="blocker" style="display:none;">
     <h1 id="block_msg" style="color:#e74c3c; font-weight:900;">সিস্টেম লোডিং...</h1>
     <p>আমাদের সাপোর্ট টিমের সাথে যোগাযোগ করুন।</p>
@@ -63,26 +60,20 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
         📢 <b>গুরুত্বপূর্ণ নোটিশ:</b><br>
         <span id="global_notice_text" style="font-size: 14px; color: #d63031; font-weight:bold;">...</span>
     </div>
-
     <div class="card">
         👋 <b>আমার বটে আপনাকে স্বাগতম</b><br>
         <span style="font-size: 13px; color: #7f8c8d;">নিয়ম মেনে কাজ করলে ইনকাম নিশ্চিত</span>
     </div>
-
     <div class="card">
         <b style="color:var(--secondary)">🎁 রেফারাল প্রোগ্রাম</b><br>
         <small>প্রতিটি সফল রেফারে ১০% কমিশন পান</small><br><br>
         <input id="reflink" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:10px; margin-bottom:10px;" readonly onclick="copyRef()"><br>
         <button class="btn btn-pink" onclick="copyRef()">Copy Link</button>
     </div>
-
-    <!-- New Buttons Added -->
     <div style="text-align: center; margin-top: 10px;">
         <a href="https://t.me/takariyel" class="btn-round bg-blue">বট আপডেট গ্রুপ</a>
         <a href="https://t.me/hafijur152" class="btn-round bg-green">সাপোর্ট</a>
     </div>
-
-    <!-- Scrolling/Static Notice -->
     <div class="notice-box">
        <marquee behavior="scroll" direction="left">আপনারা নিয়ম মেনে কাজ করবেন সবাই না হলে পেমেন্ট পাবেন না সবাই ১০ টা এড দেকে একটা এডের ওপর কিলিক করে ২০ সেকেন্ড অপেক্ষা করবেন।</marquee>
     </div>
@@ -97,10 +88,7 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
             আজকের টাস্ক: <b><span id="watched">0</span> / <span id="total_limit">100</span></b>
         </div>
         <p class="small">একটি অ্যাড দেখলে পাবেন: <b><span id="reward">0</span> ৳</b></p>
-        
         <button class="btn btn-vpn" onclick="window.open('https://play.google.com/store/apps/details?id=free.vpnaustralia.unlimited.tunnel.proxy.secure.hotspot')">🌍 Connect Australia VPN</button>
-        
-        <!-- Earn Page Notice -->
         <p style="color: red; font-size: 13px; font-weight: bold; margin-top: 10px;">
             সবাই এই ভিপিএন ডাউনলোড করে অসটোলিয়া কানেট করে কাজ করবেন না হলে পেমেন্ট বাতিল।
         </p>
@@ -111,8 +99,9 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 <div id="withdraw" class="page">
     <div class="card">
         <label>পেমেন্ট মেথড</label>
+        <!-- এটি এখন ডায়নামিক হবে -->
         <select id="method" style="width:100%; padding:14px; margin-bottom:12px; border:1.5px solid #eee; border-radius:12px;">
-            <option>Bkash</option><option>Nagad</option><option>Recharge</option>
+            <option>Loading...</option>
         </select>
         <input id="number" type="number" placeholder="017xxxxxxxx" style="width:100%; padding:14px; margin-bottom:12px; border:1.5px solid #eee; border-radius:12px;">
         <select id="amount" style="width:100%; padding:14px; margin-bottom:12px; border:1.5px solid #eee; border-radius:12px;">
@@ -120,8 +109,6 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
         </select>
         <button class="btn btn-pink" onclick="withdraw()">Withdraw Request</button>
     </div>
-
-    <!-- Withdraw Notice -->
     <div class="card" style="background: #e8f5e9; border: 1px solid #2ecc71;">
         <p style="font-size: 14px; color: #27ae60; text-align: center; margin: 0; font-weight: bold;">
             নিয়ম মেনে কাজ করলে হানডেট পাছেনট পেমেন ওয়ালেট বিকাস নগদ সরবোনিমনো ৫০ টাকা মেকছি মাম ১০০০ টাকা উথডরো কারার পরন ১২ থেকে ২৪ ঘন্টার মদ্দে পেমেন্ট পেয়ে যাবেন ইনশাআল্লাহ ।।
@@ -135,7 +122,6 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
     <div id="historyList"></div>
 </div>
 
-<!-- NAV -->
 <div class="nav">
     <button class="active" onclick="show('home',this)">🏠 Home</button>
     <button onclick="show('earn',this)">💰 Earn</button>
@@ -171,15 +157,24 @@ function notify(msg, color="#333") {
     setTimeout(() => { toast.style.top = "-100px"; }, 3000);
 }
 
-// Check IP/Country
 fetch('https://ipapi.co/json/').then(r => r.json()).then(data => {
     update(userRef, { country: data.country_name || "Unknown", lastActive: Date.now() });
 });
 
-// Admin Control & Auto Reset 6AM
 onValue(settingsRef, s => {
     if(!s.exists()) return;
     const v = s.val();
+    
+    // ডায়নামিক পেমেন্ট মেথড আপডেট লজিক
+    if(v.paymentMethods){
+        const methodSelect = document.getElementById("method");
+        const methods = v.paymentMethods.split(","); 
+        methodSelect.innerHTML = ""; 
+        methods.forEach(m => {
+            if(m.trim() !== "") methodSelect.innerHTML += `<option value="${m.trim()}">${m.trim()}</option>`;
+        });
+    }
+
     DAILY_LIMIT = v.dailyAdLimit || 100;
     AD_REWARD = v.adReward || 1;
     document.getElementById("reward").innerText = AD_REWARD;
@@ -195,7 +190,6 @@ onValue(settingsRef, s => {
     }
 });
 
-// User Control (Ban Check & Auto Reset)
 onValue(userRef, s => {
     if(!s.exists()) { set(userRef, {balance:0, ads:0, lastReset: new Date().toLocaleDateString()}); return; }
     const v = s.val();
@@ -203,14 +197,11 @@ onValue(userRef, s => {
         document.getElementById("blocker").style.display = "flex";
         document.getElementById("block_msg").innerText = "আপনি ব্যানড ❌";
     }
-    
-    // Auto Reset logic at 6 AM
     const now = new Date();
     const lastReset = v.lastReset || "";
     if(now.toLocaleDateString() !== lastReset && now.getHours() >= 6) {
         update(userRef, { ads: 0, lastReset: now.toLocaleDateString() });
     }
-
     document.getElementById("bal").innerText = v.balance || 0;
     document.getElementById("watched").innerText = v.ads || 0;
 });
@@ -232,7 +223,6 @@ window.withdraw = async () => {
     const method = document.getElementById("method").value;
     const s = await get(userRef);
     if(num.length < 10 || (s.val().balance < amt)) return notify("তথ্য সঠিক নয়!", "red");
-    
     update(userRef, { balance: s.val().balance - amt });
     push(ref(db, "withdraws"), {
         uid, amount: amt, method, number: num, status: "pending", 
