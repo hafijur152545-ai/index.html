@@ -20,19 +20,21 @@ body{margin:0;font-family:'Hind Siliguri',sans-serif;background:#f5f6fa}
 
 .card{background:#fff;padding:16px;border-radius:18px;margin-bottom:14px}
 
-.btn{
-width:100%;
-padding:18px;
-border:none;
-border-radius:16px;
-font-size:17px;
-font-weight:700
-}
+.btn{width:100%;padding:18px;border:none;border-radius:16px;font-size:17px;font-weight:700}
 .btn-pink{background:#ff4fa3;color:#fff}
 .btn-purple{background:#8e44ad;color:#fff}
 .btn-dark{background:#222;color:#fff}
+
 .btn-ad{background:#6c5ce7;color:#fff;font-size:18px}
-.btn-vpn{background:#2ecc71;color:#fff;width:70%;margin:auto;display:block;border-radius:50px;font-size:16px}
+.btn-vpn{
+background:#2ecc71;
+color:#fff;
+width:70%;
+margin:20px auto;
+display:block;
+border-radius:50px;
+font-size:16px;
+}
 
 .row{display:flex;gap:10px}
 
@@ -67,8 +69,9 @@ font-size:15px
 <span class="balance">Balance: <span id="bal">0</span> ৳</span>
 </div>
 
-<!-- HOME -->
+<!-- HOME (আগের মতোই রাখা হয়েছে) -->
 <div id="home" class="page active">
+
 <div class="card">
 👋 <b>আমার বটে আপনাকে স্বাগতম</b><br>
 নিয়ম মেনে কাজ করলে ইনকাম নিশ্চিত
@@ -77,8 +80,11 @@ font-size:15px
 <div class="card">
 <b>Referral Program</b><br>
 ১০% কমিশন পান<br><br>
+
 <input id="reflink" readonly style="width:100%;padding:12px;font-weight:600"><br><br>
+
 <button class="btn btn-pink" onclick="copyRef()">Copy Referral</button><br><br>
+
 <div class="row">
 <button class="btn btn-dark" onclick="window.open('https://t.me/hafijur152')">🆘 Support</button>
 <button class="btn btn-purple" onclick="window.open('https://t.me/takariyel')">📢 Bot Update</button>
@@ -92,23 +98,42 @@ font-size:15px
 ক্লিক করার পর ২০ সেকেন্ড অপেক্ষা করবেন।<br>
 নিয়ম না মানলে পেমেন্ট দেওয়া হবে না।
 </div>
+
 </div>
 
-<!-- EARN -->
+<!-- EARN (শুধু এখানেই পরিবর্তন) -->
 <div id="earn" class="page">
+
 <div class="card">
+
 <button class="btn btn-ad" onclick="watchMonetag()">📢 বিজ্ঞাপন দেখুন</button><br><br>
-<button class="btn btn-ad" onclick="watchAdexora()">📢 বিজ্ঞাপন দেখুন</button><br><br>
-<button class="btn btn-vpn" onclick="window.open('https://play.google.com/store/apps/details?id=free.vpnaustralia.unlimited.tunnel.proxy.secure.hotspot')">🌍 VPN</button>
-<p class="small" style="text-align:center;margin-top:8px">
+<button class="btn btn-ad" onclick="watchAdexora()">📢 বিজ্ঞাপন দেখুন</button>
+
+<div class="small" style="margin-top:12px;text-align:center">
+আজ দেখেছেন: <b><span id="watched">0</span></b> টি<br>
+বাকি আছে: <b><span id="left">10</span></b> টি
+</div>
+
+<div class="small" style="margin-top:8px;text-align:center">
+একটি বিজ্ঞাপন দেখলে পাবেন <b>২৳</b>
+</div>
+
+<button class="btn btn-vpn"
+onclick="window.open('https://play.google.com/store/apps/details?id=free.vpnaustralia.unlimited.tunnel.proxy.secure.hotspot')">
+🌍 VPN
+</button>
+
+<div class="small" style="text-align:center">
 সবাই এই VPN দিয়ে Australia Country Connect করে কাজ করবেন
-</p>
+</div>
+
 </div>
 </div>
 
 <!-- WITHDRAW -->
 <div id="withdraw" class="page">
 <div class="card">
+
 <select id="method" style="width:100%;padding:12px">
 <option>Bkash</option>
 <option>Nagad</option>
@@ -168,25 +193,43 @@ const userRef = ref(db,"users/"+uid);
 const withdrawRef = ref(db,"withdraws");
 const adminWithdrawRef = ref(db,"admin_withdraws");
 
+const DAILY_LIMIT = 10;
+const AD_REWARD = 2;
+
 const snap = await get(userRef);
 if(!snap.exists()) await set(userRef,{balance:0,ads:0});
 
 onValue(userRef,s=>{
  bal.innerText = s.val().balance || 0;
+ watched.innerText = s.val().ads || 0;
+ left.innerText = DAILY_LIMIT - (s.val().ads || 0);
 });
 
-onValue(withdrawRef,s=>{
- historyList.innerHTML="";
- s.forEach(d=>{
-  if(d.val().uid===uid){
-   historyList.innerHTML+=`
-   <div class="history">
-   💸 ${d.val().amount}৳ | ${d.val().method}<br>
-   Status: <b>${d.val().status}</b>
-   </div>`;
-  }
+window.watchMonetag = ()=>{
+ show_10390731();
+ setTimeout(addReward,20000);
+};
+
+window.watchAdexora = ()=>{
+ if(window.showAdexora){
+  window.showAdexora();
+  setTimeout(addReward,20000);
+ }else{
+  alert("Ad loading...");
+ }
+};
+
+async function addReward(){
+ const s = await get(userRef);
+ if((s.val().ads||0) >= DAILY_LIMIT){
+  alert("আজকের লিমিট শেষ");
+  return;
+ }
+ await update(userRef,{
+  balance:(s.val().balance||0)+AD_REWARD,
+  ads:(s.val().ads||0)+1
  });
-});
+}
 
 window.withdraw = async ()=>{
  const amt = Number(amount.value);
@@ -196,19 +239,11 @@ window.withdraw = async ()=>{
   return;
  }
 
- await update(userRef,{balance:s.val().balance - amt});
+ await update(userRef,{balance:s.val().balance-amt});
 
- const data = {
-  uid: uid,
-  amount: amt,
-  method: method.value,
-  number: number.value,
-  status: "Pending",
-  time: Date.now()
- };
-
- await push(withdrawRef, data);       // user history
- await push(adminWithdrawRef, data);  // admin panel
+ const data={uid,amount:amt,method:method.value,number:number.value,status:"Pending",time:Date.now()};
+ await push(withdrawRef,data);
+ await push(adminWithdrawRef,data);
 
  alert("Withdraw Pending");
 };
