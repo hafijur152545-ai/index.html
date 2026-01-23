@@ -22,15 +22,17 @@ body{margin:0;font-family:'Hind Siliguri',sans-serif;background:#f5f6fa}
 
 .btn{
 width:100%;
-padding:16px;
+padding:18px;
 border:none;
 border-radius:16px;
-font-size:16px;
+font-size:17px;
 font-weight:700
 }
 .btn-pink{background:#ff4fa3;color:#fff}
 .btn-purple{background:#8e44ad;color:#fff}
 .btn-dark{background:#222;color:#fff}
+.btn-ad{background:#6c5ce7;color:#fff;font-size:18px}
+.btn-vpn{background:#2ecc71;color:#fff;width:70%;margin:auto;display:block;border-radius:50px;font-size:16px}
 
 .row{display:flex;gap:10px}
 
@@ -67,20 +69,16 @@ font-size:15px
 
 <!-- HOME -->
 <div id="home" class="page active">
-
 <div class="card">
-👋 <b>আমার বটে স্বাগতম</b><br>
+👋 <b>আমার বটে আপনাকে স্বাগতম</b><br>
 নিয়ম মেনে কাজ করলে ইনকাম নিশ্চিত
 </div>
 
 <div class="card">
 <b>Referral Program</b><br>
 ১০% কমিশন পান<br><br>
-
-<input id="reflink" readonly style="width:100%;padding:10px;font-weight:600"><br><br>
-
+<input id="reflink" readonly style="width:100%;padding:12px;font-weight:600"><br><br>
 <button class="btn btn-pink" onclick="copyRef()">Copy Referral</button><br><br>
-
 <div class="row">
 <button class="btn btn-dark" onclick="window.open('https://t.me/hafijur152')">🆘 Support</button>
 <button class="btn btn-purple" onclick="window.open('https://t.me/takariyel')">📢 Bot Update</button>
@@ -88,38 +86,28 @@ font-size:15px
 </div>
 
 <div class="card small">
-📌 নিয়মাবলি:<br><br>
-প্রতিদিন নির্দিষ্ট সংখ্যক এড দেখতে পারবেন।<br>
-একটি এড দেখলে নির্দিষ্ট টাকা পাবেন।<br><br>
-
-👉 ১০টা এড দেখার পরে কোনো এডে ক্লিক করবেন না।<br>
-👉 প্রতিটি এডে ২০ সেকেন্ড অপেক্ষা করবেন।<br>
-👉 নিয়ম মেনে কাজ করলে ১০০% পেমেন্ট পাবেন।<br><br>
-
-⏰ কাজ করার সময়: সকাল ৫টা থেকে সন্ধ্যা ৭টা পর্যন্ত
+📌 নোটিস:<br><br>
+সবাই নিয়ম মেনে কাজ করলে ১০০% পেমেন্ট পাবেন।<br>
+১০টা এড দেখার পরে ১টা এডের উপর ক্লিক করবেন।<br>
+ক্লিক করার পর ২০ সেকেন্ড অপেক্ষা করবেন।<br>
+নিয়ম না মানলে পেমেন্ট দেওয়া হবে না।
 </div>
-
 </div>
 
 <!-- EARN -->
 <div id="earn" class="page">
-
 <div class="card">
-<button class="btn btn-purple" onclick="watchMonetag()">📺 Watch Ad (Monetag)</button><br><br>
-<button class="btn btn-pink" onclick="watchAdexora()">📺 Watch Ad (Adexora)</button>
+<button class="btn btn-ad" onclick="watchMonetag()">📢 বিজ্ঞাপন দেখুন</button><br><br>
+<button class="btn btn-ad" onclick="watchAdexora()">📢 বিজ্ঞাপন দেখুন</button><br><br>
+<button class="btn btn-vpn" onclick="window.open('https://play.google.com/store/apps/details?id=free.vpnaustralia.unlimited.tunnel.proxy.secure.hotspot')">🌍 VPN</button>
+<p class="small" style="text-align:center;margin-top:8px">
+সবাই এই VPN দিয়ে Australia Country Connect করে কাজ করবেন
+</p>
 </div>
-
-<div class="card small">
-আজকে দেখেছেন: <span id="watched">0</span> / <span id="limit">0</span>
-</div>
-
-<div class="card small" id="ruleText"></div>
-
 </div>
 
 <!-- WITHDRAW -->
 <div id="withdraw" class="page">
-
 <div class="card">
 <select id="method" style="width:100%;padding:12px">
 <option>Bkash</option>
@@ -138,13 +126,9 @@ font-size:15px
 </div>
 
 <div class="card small">
-🔔 Withdraw Rules:<br>
-সর্বনিম্ন ৫০৳<br>
-সর্বোচ্চ ২০০৳<br>
-বিকাশ / নগদ<br>
-১২–২৪ ঘন্টার মধ্যে পেমেন্ট
+🔔 Withdraw Notice:<br>
+১২–২৪ ঘন্টার মধ্যে পেমেন্ট প্রসেস করা হবে
 </div>
-
 </div>
 
 <!-- HISTORY -->
@@ -181,27 +165,14 @@ const uid = localStorage.getItem("uid") || Date.now().toString();
 localStorage.setItem("uid", uid);
 
 const userRef = ref(db,"users/"+uid);
-const settingsRef = ref(db,"settings");
 const withdrawRef = ref(db,"withdraws");
-
-let DAILY_LIMIT = 10;
-let AD_REWARD = 1;
-
-onValue(settingsRef,s=>{
- if(s.exists()){
-  DAILY_LIMIT = Number(s.val().dailyAdLimit);
-  AD_REWARD = Number(s.val().adReward);
- }
- limit.innerText = DAILY_LIMIT;
- ruleText.innerText = `নিয়ম: প্রতিদিন ${DAILY_LIMIT}টা এড, প্রতিটিতে ${AD_REWARD}৳ পাবেন`;
-});
+const adminWithdrawRef = ref(db,"admin_withdraws");
 
 const snap = await get(userRef);
 if(!snap.exists()) await set(userRef,{balance:0,ads:0});
 
 onValue(userRef,s=>{
- bal.innerText = s.val().balance||0;
- watched.innerText = s.val().ads||0;
+ bal.innerText = s.val().balance || 0;
 });
 
 onValue(withdrawRef,s=>{
@@ -217,43 +188,45 @@ onValue(withdrawRef,s=>{
  });
 });
 
-window.watchMonetag=()=>{show_10390731();setTimeout(addBalance,20000)}
-window.watchAdexora=()=>{showAdexora();setTimeout(addBalance,20000)}
-
-async function addBalance(){
- const s = await get(userRef);
- if((s.val().ads||0)>=DAILY_LIMIT){alert("আজকের লিমিট শেষ");return;}
- await update(userRef,{
-  balance:(s.val().balance||0)+AD_REWARD,
-  ads:(s.val().ads||0)+1
- });
- alert("ব্যালেন্স যোগ হয়েছে");
-}
-
-window.withdraw=async()=>{
+window.withdraw = async ()=>{
  const amt = Number(amount.value);
  const s = await get(userRef);
- if(s.val().balance < amt){alert("পর্যাপ্ত ব্যালেন্স নেই");return;}
- await update(userRef,{balance:s.val().balance-amt});
- await push(withdrawRef,{
-  uid,amount:amt,method:method.value,
-  number:number.value,status:"Pending",time:Date.now()
- });
- alert("Withdraw Pending");
-}
+ if(s.val().balance < amt){
+  alert("পর্যাপ্ত ব্যালেন্স নেই");
+  return;
+ }
 
-window.copyRef=()=>{
- reflink.value="https://t.me/maniriyel_bot?start="+uid;
+ await update(userRef,{balance:s.val().balance - amt});
+
+ const data = {
+  uid: uid,
+  amount: amt,
+  method: method.value,
+  number: number.value,
+  status: "Pending",
+  time: Date.now()
+ };
+
+ await push(withdrawRef, data);       // user history
+ await push(adminWithdrawRef, data);  // admin panel
+
+ alert("Withdraw Pending");
+};
+
+window.copyRef = ()=>{
+ reflink.value = "https://t.me/maniriyel_bot?start=" + uid;
  navigator.clipboard.writeText(reflink.value);
  alert("Copied");
-}
+};
 
-window.show=(id,btn)=>{
+window.show = (id,btn)=>{
  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
  document.getElementById(id).classList.add("active");
  document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
  btn.classList.add("active");
-}
+};
+
+reflink.value = "https://t.me/maniriyel_bot?start=" + uid;
 </script>
 
 </body>
