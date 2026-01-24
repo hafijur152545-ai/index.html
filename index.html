@@ -189,28 +189,33 @@ function notify(msg, bg) {
     toast.style.top = "20px"; setTimeout(() => { toast.style.top = "-100px"; }, 3500);
 }
 
-// লোডিং এবং ব্যালেন্স আপডেট ফাংশন
+// এটিই আপনার চাওয়া ৫ সেকেন্ডের টাইমার ও সাকসেস মেসেজ ফাংশন
 async function processReward() {
     const btn1 = document.getElementById("btn_srv1");
     const btn2 = document.getElementById("btn_srv2");
 
+    // অ্যাড ক্লোজ করার সাথে সাথে বাটন বন্ধ হবে এবং ৫ সেকেন্ড লোডিং নোটিশ দেবে
     btn1.disabled = true;
     btn2.disabled = true;
     notify("অপেক্ষা করুন... ৫ সেকেন্ড", "orange");
 
+    // ৫ সেকেন্ড অপেক্ষা করার পর
     setTimeout(async () => {
         const s = await get(userRef);
         const settings = await get(settingsRef);
         const count = s.val().ads || 0;
 
         if(count < (settings.val().dailyAdLimit || 100)) {
+            // ৫ সেকেন্ড পরেই ডাটাবেসে ব্যালেন্স আপডেট হবে
             await update(userRef, { 
                 balance: (s.val().balance || 0) + (settings.val().adReward || 1), 
                 ads: count + 1 
             });
+            // ব্যালেন্স আপডেট শেষ হলে আপনার দেওয়া সাকসেস মেসেজটি দেখাবে
             notify("Success Task! আপনার ব্যালেন্স আপডেট হয়েছে");
         }
 
+        // ৫ সেকেন্ড শেষ হলে বাটন আবার সচল হবে
         btn1.disabled = false;
         btn2.disabled = false;
     }, 5000);
@@ -219,15 +224,16 @@ async function processReward() {
 window.watchMonetag = () => { 
     if(window.show_10390731) { 
         show_10390731({
+            // ক্লোজ বাটন চাপলে ৫ সেকেন্ডের প্রসেস শুরু হবে
             onAdClosed: () => { processReward(); } 
         });
     } 
 };
 
 window.watchAdexora = () => { 
-    // Adexora Fix: Calling with callback explicitly
     if(window.showAdexora) { 
         window.showAdexora({
+            // ক্লোজ বাটন চাপলে ৫ সেকেন্ডের প্রসেস শুরু হবে
             onAdClosed: () => { processReward(); }
         });
     } else if(typeof adexora_show === 'function') {
@@ -265,7 +271,6 @@ onValue(userRef, s => {
     const btn1 = document.getElementById("btn_srv1");
     const btn2 = document.getElementById("btn_srv2");
     
-    // বাটন টেক্সট আপডেট (বিজ্ঞাপন দেখুন রাখা হয়েছে)
     if(count > 0 && count % 10 === 0){
         btn1.innerText = "এডের উপর ক্লিক করে ২০ সেকেন্ড অপেক্ষা করুন";
         btn2.innerText = "এডের উপর ক্লিক করে ২০ সেকেন্ড অপেক্ষা করুন";
