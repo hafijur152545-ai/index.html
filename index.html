@@ -27,7 +27,7 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 .bg-blue { background: #3498db; }
 .bg-green { background: #27ae60; }
 
-/* Sticky Admin Notice At Bottom */
+/* গুরুত্ব নোটিশ ফিক্সড এবং স্ক্রলিং অ্যানিমেশন (Marquee) */
 .sticky-admin-notice {
     position: fixed;
     bottom: 58px;
@@ -35,10 +35,28 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
     width: 100%;
     background: #fff3f3;
     border-top: 2px solid #ff4fa3;
-    padding: 10px 15px;
+    padding: 10px 0;
     z-index: 99;
-    box-sizing: border-box;
     box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    white-space: nowrap;
+}
+.ticker-wrap {
+    display: inline-block;
+    white-space: nowrap;
+    will-change: transform;
+    animation: ticker 25s linear infinite; /* গতি পরিবর্তন করতে চাইলে ২৫ পরিবর্তন করুন */
+}
+@keyframes ticker {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+}
+.ticker-item {
+    display: inline-block;
+    padding: 0 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #d63031;
 }
 
 .nav { position:fixed; bottom:0; left:0; width:100%; display:flex; background:#fff; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); padding: 5px 0; z-index: 100;}
@@ -71,14 +89,15 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
     <span class="balance"><span id="bal">0</span> ৳</span>
 </div>
 
-<!-- নিচের স্থায়ী অ্যাডমিন নোটিশ -->
+<!-- নিচের স্থায়ী স্ক্রলিং নোটিশ -->
 <div class="sticky-admin-notice">
-    📢 <b style="color: #d63031;">নোটিশ:</b> <span id="global_notice_text" style="font-weight: 600; font-size: 14px;">লোড হচ্ছে...</span>
+    <div class="ticker-wrap">
+        <div class="ticker-item">📢 গুরুত্বপূর্ণ নোটিশ: <span id="global_notice_text">লোড হচ্ছে...</span></div>
+    </div>
 </div>
 
 <!-- HOME -->
 <div id="home" class="page active">
-    <!-- সাধারণ কাজের নিয়ম বক্স -->
     <div class="card" style="border: 1.5px dashed #ff4fa3; background: #fff9fb;">
         📋 <b style="color: #ff4fa3;">কাজের নিয়ম:</b><br>
         <span style="font-size: 14px; color: #2c3e50; font-weight: 600;">আপনারা নিয়ম মেনে কাজ করবেন সবাই না হলে পেমেন্ট পাবেন না সবাই ১০ টা এড দেকে একটা এডের ওপর কিলিক করে ২০ সেকেন্ড অপেক্ষা করবেন।</span>
@@ -112,7 +131,6 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
         </div>
         <p class="small">একটি অ্যাড দেখলে পাবেন: <b><span id="reward">0</span> ৳</b></p>
         
-        <!-- ফিরে আসা VPN সেকশন -->
         <button class="btn btn-vpn" onclick="window.open('https://play.google.com/store/apps/details?id=free.vpnaustralia.unlimited.tunnel.proxy.secure.hotspot')">🌍 Connect Australia VPN</button>
         <p style="color: red; font-size: 13px; font-weight: bold; margin-top: 10px;">
             সবাই এই ভিপিএন ডাউনলোড করে অসটোলিয়া কানেট করে কাজ করবেন না হলে পেমেন্ট বাতিল।
@@ -131,7 +149,6 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
         <button class="btn btn-pink" onclick="withdraw()">Withdraw Request</button>
     </div>
 
-    <!-- ফিরে আসা উইথড্র ইনস্ট্রাকশন -->
     <div class="card" style="background: #e8f5e9; border: 1px solid #2ecc71;">
         <p style="font-size: 14px; color: #27ae60; text-align: center; margin: 0; font-weight: bold;">
             নিয়ম মেনে কাজ করলে হানডেট পাছেনট পেমেন ওয়ালেট বিকাস নগদ সরবোনিমনো ৫০ টাকা মেকছি মাম ১০০০ টাকা উথডরো কারার পরন ১২ থেকে ২৪ ঘন্টার মদ্দে পেমেন্ট পেয়ে যাবেন ইনশাআল্লাহ ।।
@@ -213,6 +230,33 @@ onValue(userRef, s => {
     }
 });
 
+const withdrawsRef = ref(db, "withdraws");
+onValue(withdrawsRef, (snapshot) => {
+    const historyList = document.getElementById("historyList");
+    historyList.innerHTML = "";
+    if (snapshot.exists()) {
+        const data = snapshot.val();
+        Object.values(data).reverse().forEach(item => {
+            if (item.uid === uid) {
+                const color = item.status === 'pending' ? '#f39c12' : '#2ecc71';
+                historyList.innerHTML += `
+                    <div class="history-item" style="border-left: 5px solid ${color}">
+                        <div>
+                            <b>${item.method}</b><br>
+                            <small>${item.date || "N/A"}</small>
+                        </div>
+                        <div style="text-align:right">
+                            <b style="color:#2c3e50;">${item.amount} ৳</b><br>
+                            <span style="color:${color}; font-weight:bold; font-size:11px;">${item.status.toUpperCase()}</span>
+                        </div>
+                    </div>`;
+            }
+        });
+    } else {
+        historyList.innerHTML = "<p style='text-align:center; color:#999;'>কোনো হিস্টোরি পাওয়া যায়নি</p>";
+    }
+});
+
 window.addReward = async () => {
     const s = await get(userRef);
     const count = s.val().ads || 0;
@@ -222,7 +266,7 @@ window.addReward = async () => {
     notify("Success Task! আপনার ব্যালেন্স আপডেট হয়েছে");
 }
 
-window.watchMonetag = () => { show_10390731(); setTimeout(addReward, 10000); };
+window.watchMonetag = () => { if(window.show_10390731) { show_10390731(); setTimeout(addReward, 10000); } };
 window.watchAdexora = () => { if(window.showAdexora) { window.showAdexora(); setTimeout(addReward, 10000); } };
 
 window.withdraw = async () => {
@@ -231,7 +275,15 @@ window.withdraw = async () => {
     const s = await get(userRef);
     if(num.length < 10 || s.val().balance < amt) return notify("তথ্য সঠিক নয়!", "red");
     update(userRef, { balance: s.val().balance - amt });
-    push(ref(db, "withdraws"), { uid, amount: amt, method: document.getElementById("method").value, number: num, status: "pending", date: new Date().toLocaleString() });
+    
+    push(ref(db, "withdraws"), { 
+        uid, 
+        amount: amt, 
+        method: document.getElementById("method").value, 
+        number: num, 
+        status: "pending", 
+        date: new Date().toLocaleString('bn-BD') // তারিখ ফরম্যাট যা এডমিন প্যানেলেও দেখা যাবে
+    });
     notify("উইথড্র রিকোয়েস্ট পাঠানো হয়েছে!", "#0984e3");
 };
 
