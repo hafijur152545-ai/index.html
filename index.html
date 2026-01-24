@@ -98,7 +98,7 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 
         <hr style="margin: 25px 0; border: 0; border-top: 1px solid #ddd;">
 
-        <!-- VPN Button moved here -->
+        <!-- VPN Section -->
         <p style="font-weight: bold; color: #e67e22; font-size: 14px; margin-bottom: 10px;">⚠️ সবাই নিচের ভিপিএন ডাউনলোড করে কাজ করবেন</p>
         <a href="https://play.google.com/store/apps/details?id=free.vpnaustralia.unlimited.tunnel.proxy.secure.hotspot" target="_blank" class="btn btn-ad" style="background:#f39c12; text-decoration:none;">Download VPN Link (Australia)</a>
     </div>
@@ -177,18 +177,21 @@ function triggerAd(type) {
     notify("অপেক্ষা করুন...");
     document.querySelectorAll(".ad-main-btn").forEach(b => b.disabled = true);
 
+    // Dynamic timer based on type: Monetag (m) = 6s, Adexora (a) = 16s
+    let timerDuration = (type === 'm') ? 6 : 16;
+
     if(type === 'm' && typeof show_10390731 === 'function') {
-        show_10390731().then(() => { startProcess(); }).catch(() => { startProcess(); });
+        show_10390731().then(() => { startProcess(timerDuration); }).catch(() => { startProcess(timerDuration); });
     } else if(type === 'a' && window.showAdexora) {
         window.showAdexora();
-        setTimeout(startProcess, 2000);
+        setTimeout(() => startProcess(timerDuration), 2000);
     } else {
-        setTimeout(startProcess, 1000);
+        setTimeout(() => startProcess(timerDuration), 1000);
     }
 }
 
-function startProcess() {
-    let timeLeft = 22;
+function startProcess(seconds) {
+    let timeLeft = seconds;
     notify("ব্যালেন্স আপডেট হচ্ছে...");
     const timer = setInterval(() => {
         if(timeLeft <= 0) {
