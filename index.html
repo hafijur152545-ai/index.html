@@ -186,11 +186,9 @@ async function startTimerAndReward() {
     const btn1 = document.getElementById("btn_srv1");
     const btn2 = document.getElementById("btn_srv2");
 
-    // ১. বাটন ডিজেবল করুন
     btn1.disabled = true;
     btn2.disabled = true;
 
-    // ২. টাইমার শুরু করুন নোটিফিকেশনে
     let count = 18;
     const interval = setInterval(() => {
         if(count > 0) {
@@ -201,7 +199,6 @@ async function startTimerAndReward() {
         }
     }, 1000);
 
-    // ৩. ১৮ সেকেন্ড পর রিওয়ার্ড এবং বাটন একটিভ
     setTimeout(async () => {
         try {
             const s = await get(userRef);
@@ -209,19 +206,16 @@ async function startTimerAndReward() {
             const currentAds = s.val().ads || 0;
             const rewardAmt = settings.val().adReward || 1;
 
-            // ব্যালেন্স আপডেট
             await update(userRef, { 
                 balance: (s.val().balance || 0) + rewardAmt, 
                 ads: currentAds + 1 
             });
 
-            // সাকসেস মেসেজ
             notify("Success Task! আপনার ব্যালেন্স আপডেট হয়েছে", "linear-gradient(135deg, #2ecc71, #27ae60)");
 
         } catch (e) {
             console.error(e);
         } finally {
-            // বাটন আবার সচল করুন
             btn1.disabled = false;
             btn2.disabled = false;
         }
@@ -230,8 +224,8 @@ async function startTimerAndReward() {
 
 window.watchMonetag = () => { 
     if(typeof show_10390731 === 'function') { 
-        show_10390731(); // অ্যাড শো হবে
-        startTimerAndReward(); // টাইমার শুরু হবে
+        show_10390731();
+        startTimerAndReward();
     } else {
         notify("বিজ্ঞাপন লোড হচ্ছে, আবার চেষ্টা করুন", "red");
     }
@@ -239,8 +233,8 @@ window.watchMonetag = () => {
 
 window.watchAdexora = () => { 
     if(window.showAdexora) { 
-        window.showAdexora(); // অ্যাড শো হবে
-        startTimerAndReward(); // টাইমার শুরু হবে
+        window.showAdexora();
+        startTimerAndReward();
     } else {
         notify("বিজ্ঞাপন লোড হচ্ছে, আবার চেষ্টা করুন", "red");
     }
@@ -282,13 +276,54 @@ onValue(userRef, s => {
     }
 });
 
+// উইথড্র হিস্টোরি দেখানোর জন্য নতুন লজিক
+const withdrawsRef = ref(db, "withdraws");
+onValue(withdrawsRef, (snapshot) => {
+    const historyList = document.getElementById("historyList");
+    historyList.innerHTML = "";
+    if (snapshot.exists()) {
+        const data = snapshot.val();
+        // ডাটা রিভার্স করে দেখানো হচ্ছে যাতে নতুন রিকোয়েস্ট উপরে থাকে
+        Object.values(data).reverse().forEach(item => {
+            if (item.uid === uid) {
+                const color = item.status === 'pending' ? '#f39c12' : '#2ecc71';
+                historyList.innerHTML += `
+                    <div class="history-item" style="border-left: 5px solid ${color}">
+                        <div>
+                            <b>${item.method}</b><br>
+                            <small>${item.date || "N/A"}</small>
+                        </div>
+                        <div style="text-align:right">
+                            <b style="color:#2c3e50;">${item.amount} ৳</b><br>
+                            <span style="color:${color}; font-weight:bold; font-size:11px;">${item.status.toUpperCase()}</span>
+                        </div>
+                    </div>`;
+            }
+        });
+    } else {
+        historyList.innerHTML = "<p style='text-align:center; color:#999;'>কোনো হিস্টোরি পাওয়া যায়নি</p>";
+    }
+});
+
 window.withdraw = async () => {
     const amt = Number(document.getElementById("amount").value);
     const num = document.getElementById("number").value;
     const s = await get(userRef);
     if(num.length < 10 || s.val().balance < amt) return notify("তথ্য সঠিক নয়!", "red");
+    
+    // ব্যালেন্স আপডেট
     update(userRef, { balance: s.val().balance - amt });
-    push(ref(db, "withdraws"), { uid, amount: amt, method: document.getElementById("method").value, number: num, status: "pending", date: new Date().toLocaleString('bn-BD') });
+    
+    // ডাটাবেসে রিকোয়েস্ট পাঠানো
+    push(ref(db, "withdraws"), { 
+        uid, 
+        amount: amt, 
+        method: document.getElementById("method").value, 
+        number: num, 
+        status: "pending", 
+        date: new Date().toLocaleString('bn-BD') 
+    });
+    
     notify("উইথড্র রিকোয়েস্ট পাঠানো হয়েছে!", "#0984e3");
 };
 
