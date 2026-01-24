@@ -177,8 +177,8 @@ function triggerAd(type) {
     notify("অপেক্ষা করুন...");
     document.querySelectorAll(".ad-main-btn").forEach(b => b.disabled = true);
 
-    // Dynamic timer based on type: Monetag (m) = 6s, Adexora (a) = 16s
-    let timerDuration = (type === 'm') ? 6 : 16;
+    // Dynamic timer based on type: Monetag (m) = 5s, Adexora (a) = 20s
+    let timerDuration = (type === 'm') ? 5 : 20;
 
     if(type === 'm' && typeof show_10390731 === 'function') {
         show_10390731().then(() => { startProcess(timerDuration); }).catch(() => { startProcess(timerDuration); });
