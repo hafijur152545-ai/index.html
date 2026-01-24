@@ -5,147 +5,103 @@
 <title>Earn Money Bot</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
-<!-- Ad SDKs -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="//libtl.com/sdk.js" data-zone="10390731" data-sdk="show_10390731"></script>
 <script src="https://adexora.com/cdn/ads.js?id=1551"></script>
 
 <style>
 :root { --primary: #ff4fa3; --secondary: #8e44ad; --dark: #2c3e50; --success: #2ecc71; --glass: rgba(255, 255, 255, 0.95); }
-body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; color: #333; padding-bottom: 135px; overflow-x: hidden;} 
-.header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; padding: 25px 15px; text-align: center; border-radius: 0 0 30px 30px; }
+body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; color: #333; padding-bottom: 110px; overflow-x: hidden;} 
+.header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; padding: 25px 15px; text-align: center; border-radius: 0 0 30px 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 .balance { font-size: 28px; font-weight: 800; display: block; margin-top: 5px; }
 .page { display:none; padding:15px; animation: fadeIn 0.4s ease; }
 .page.active { display:block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-.card { background: var(--glass); padding: 20px; border-radius: 20px; margin-bottom: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
-.btn { width:100%; padding:16px; border:none; border-radius:15px; font-size:16px; font-weight:700; cursor:pointer; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-.btn-ad { background: linear-gradient(45deg, #6c5ce7, #a29bfe); color:#fff; font-size:18px; border-radius: 500px; margin-bottom:12px; }
-.btn-ad:disabled { background: #bdc3c7; filter: grayscale(1); opacity: 0.8; pointer-events: none; }
-.nav { position:fixed; bottom:0; left:0; width:100%; display:flex; background:#fff; padding: 10px 0; z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.1);}
-.nav button { flex:1; border:none; background:none; font-weight:700; color: #95a5a6; cursor:pointer; font-size: 11px;}
-.nav button.active { color: var(--primary); }
-#toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 25px; border-radius: 50px; transition: 0.5s ease; z-index: 2000; font-size: 14px; text-align: center; min-width: 220px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
-#blocker { position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:10000; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; }
-.floating-card { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 3000; }
-.f-box { background: white; width: 85%; padding: 25px; border-radius: 25px; text-align: center; border: 4px solid var(--primary); }
-.history-item { background: #fff; padding: 12px; border-radius: 12px; margin-bottom: 10px; flex-direction: column; display: flex; border-left: 4px solid #ddd;}
-.ref-premium { background: linear-gradient(135deg, #6e8efb, #a777e3); padding: 20px; border-radius: 20px; margin-top: 15px; color: white; cursor: pointer; border: 2px solid #fff; box-shadow: 0 10px 20px rgba(110, 142, 251, 0.3); transition: 0.3s; text-align: center;}
-.task-card { background: #fff; padding: 15px; border-radius: 15px; border: 1px solid #eee; margin-bottom: 15px; }
-.task-link { color: #3498db; font-weight: bold; text-decoration: underline; word-break: break-all; }
-
-/* Popup Notice Animation */
-@keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.card { background: var(--glass); padding: 18px; border-radius: 25px; margin-bottom: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.06); }
+.btn-ad-green { background: #27ae60; color: white; border: none; padding: 11px; width: 85%; margin: 0 auto; border-radius: 50px; font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-ad-purple { background: #8e44ad; color: white; border: none; padding: 11px; width: 85%; margin: 0 auto; border-radius: 50px; font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.marquee-mid { background: #1a1a1a; color: #00d2ff; padding: 3px 0; font-size: 10px; border-radius: 50px; margin: 15px 0; overflow: hidden; }
+.nav { position:fixed; bottom:15px; left:15px; right:15px; display:flex; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); padding: 12px 5px; z-index: 1000; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.5); }
+.nav button { flex:1; border:none; background:none; font-weight:700; color: #bdc3c7; cursor:pointer; font-size: 10px; }
+.nav button i { font-size: 18px; display: block; margin-bottom: 4px; }
+.nav button.active { color: var(--primary); transform: translateY(-3px); }
+#toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 50px; transition: 0.5s ease; z-index: 3000; font-size: 13px; }
+.ref-box-ultra-slim { background: linear-gradient(135deg, #8593fb, #e47cfb); padding: 8px 12px; border-radius: 12px; color: white; cursor: pointer; text-align: center; box-shadow: 0 4px 15px rgba(133, 147, 251, 0.2); width: 90%; margin: 0 auto; }
 </style>
 </head>
 <body>
 
-<div id="blocker">
-    <h2 style="color:#e74c3c;">আপনি ব্যান হয়েছেন</h2>
-    <p>সাপোর্টে যোগাযোগ করুন: t.me/hafijur152</p>
-</div>
+<div id="toast"></div>
 
-<!-- AUTO POPUP MODAL (New) -->
+<!-- POPUP MODAL -->
 <div id="popupModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(5px);">
-    <div style="background:white; width:100%; max-width:350px; border-radius:30px; overflow:hidden; animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+    <div style="background:white; width:100%; max-width:350px; border-radius:30px; overflow:hidden;">
         <div style="padding:25px; text-align:center;">
             <div style="font-size:45px; margin-bottom:10px;">📢</div>
             <h3 style="margin:0; color:#3498db; font-size:22px; font-weight:800;">নোটিস</h3>
-            <div id="popup_content" style="margin:18px 0; text-align:left; font-size:14px; color:#444; max-height:250px; overflow-y:auto; line-height:1.6; background:#f8f9fa; padding:15px; border-radius:15px; white-space:pre-wrap; border: 1px solid #eee;">
-                <!-- Content here -->
-            </div>
-            <button onclick="closePopup()" style="width:100%; padding:16px; background:#3498db; color:white; border:none; border-radius:18px; font-weight:bold; font-size:16px; cursor:pointer; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3); transition: 0.2s;">বুঝেছি</button>
+            <div id="popup_content" style="margin:18px 0; text-align:left; font-size:14px; color:#444; max-height:200px; overflow-y:auto; line-height:1.6; background:#f8f9fa; padding:12px; border-radius:15px; white-space:pre-wrap;"></div>
+            <button onclick="document.getElementById('popupModal').style.display='none'; sessionStorage.setItem('shown_notice','true')" style="width:100%; padding:15px; background:#3498db; color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">বুঝেছি</button>
         </div>
     </div>
 </div>
-
-<div id="floatingAd" class="floating-card">
-    <div class="f-box">
-        <h3 style="color: var(--primary)">Special Reward!</h3>
-        <p style="font-weight: 600;">এডের উপর ক্লিক করে ২০ সেকেন্ড অপেক্ষা করবেন</p>
-        <button class="btn btn-ad" style="background: var(--primary)" onclick="closeFloatingAndAd()">OPEN</button>
-    </div>
-</div>
-
-<div id="toast"></div>
 
 <div class="header">
     💰 <b>Earn Money Bot</b><br>
     <span class="balance"><span id="bal">0</span> ৳</span>
 </div>
 
-<!-- Home -->
+<!-- Home Page -->
 <div id="home" class="page active">
     <div class="card" style="text-align: center;">
-        <img id="startImg" src="https://via.placeholder.com/400x200?text=Welcome+To+Earn+Money" style="width: 100%; border-radius: 15px; margin-bottom: 15px;">
-        <p id="h_notice" style="font-size: 14px; color: #2c3e50; font-weight: bold;"></p>
-        
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom: 5px;">
-            <a href="https://t.me/takariyel" target="_blank" class="btn btn-ad" style="background:#3498db; text-decoration:none; font-size: 13px; padding: 12px;">বট আপডেট গ্রুপ</a>
-            <a href="https://t.me/hafijur152" target="_blank" class="btn btn-ad" style="background:#27ae60; text-decoration:none; font-size: 13px; padding: 12px;">সাপোর্ট</a>
+        <div style="display:flex; gap:15px; margin-bottom: 20px;">
+            <a href="https://t.me/takariyel" target="_blank" style="background:#3498db; flex:1; padding:12px; border-radius:15px; color:white; text-decoration:none; font-weight:bold; font-size:13px;">বট আপডেট</a>
+            <a href="https://t.me/hafijur152" target="_blank" style="background:#2ecc71; flex:1; padding:12px; border-radius:15px; color:white; text-decoration:none; font-weight:bold; font-size:13px;">সাপোর্ট</a>
         </div>
-        
-        <div class="ref-premium" onclick="copyRef()">
-            <span style="font-size: 14px; opacity: 0.9;">আপনার রেফার লিঙ্ক (কপি করতে এখানে ক্লিক করুন)</span><br>
-            <strong id="ref_link" style="font-size: 13px; letter-spacing: 0.5px;">https://t.me/maniriyel_bot?start=loading</strong>
-            <hr style="opacity: 0.3; margin: 10px 0;">
-            <span style="font-size: 15px; font-weight: bold;">🎁 রেফার করুন ১০% কমিশন পান</span>
+        <img src="https://cdn-icons-png.flaticon.com/512/2489/2489756.png" style="width: 60px; margin-bottom: 15px;">
+        <div class="ref-box-ultra-slim" onclick="copyRef()">
+            <span style="font-size: 10px; opacity: 0.9;">রেফার লিঙ্ক (কপি করতে ক্লিক করুন)</span><br>
+            <strong id="ref_link" style="font-size: 11px;">https://t.me/maniriyel_bot?start=loading</strong>
+        </div>
+        <p style="font-size: 13px; font-weight: bold; color: #8e44ad; margin: 10px 0;">🎁 রেফার করুন ১০% কমিশন পান</p>
+        <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+            <a href="https://play.google.com/store/apps/details?id=free.vpnaustralia.unlimited.tunnel.proxy.secure.hotspot" target="_blank" style="background: linear-gradient(45deg, #f39c12, #d35400); color:white; text-decoration:none; padding:12px; border-radius:12px; display:block; font-weight:bold; font-size:14px;">Download VPN (Australia)</a>
+            <p style="font-size: 10px; font-weight: bold; color: #e67e22; margin-top: 8px;">এই ভিপিএন ডাউনলোড করে কাজ করবেন সবাই ।</p>
         </div>
     </div>
 </div>
 
-<!-- Task -->
+<!-- Task Page -->
 <div id="task" class="page">
-    <h3 style="margin-bottom: 15px;">📋 উপলব্ধ টাস্কসমূহ</h3>
-    <div id="task_container">
-        <!-- Tasks will be loaded here -->
-        <p style="text-align:center; color:#999;">কোনো টাস্ক নেই</p>
-    </div>
+    <h3 style="margin-bottom: 15px; font-size: 18px;">📋 উপলব্ধ টাস্কসমূহ</h3>
+    <div id="task_container"></div>
 </div>
 
-<!-- Earn -->
+<!-- Earn Page -->
 <div id="earn" class="page">
     <div class="card" style="text-align: center;">
-        <button id="btn_srv1" class="btn btn-ad ad-main-btn" onclick="runAdFlow('m')">Server 1 (Monetag)</button>
-        <button id="btn_srv2" class="btn btn-ad ad-main-btn" onclick="runAdFlow('a')">Server 2 (Adexora)</button>
-        
-        <div style="margin-top:20px; background: #fff5f8; padding: 15px; border-radius: 15px; border: 1px solid #ff4fa322;">
-            আজকের টাস্ক: <b><span id="watched">0</span> / <span id="total_limit">100</span></b>
-        </div>
-        <hr style="margin: 25px 0; border: 0; border-top: 1px solid #ddd;">
-        <p style="font-weight: bold; color: #e67e22; font-size: 14px; margin-bottom: 10px;">⚠️ সবাই নিচের ভিপিএন ডাউনলোড করে কাজ করবেন</p>
-        <a href="https://play.google.com/store/apps/details?id=free.vpnaustralia.unlimited.tunnel.proxy.secure.hotspot" target="_blank" class="btn btn-ad" style="background:#f39c12; text-decoration:none;">Download VPN Link (Australia)</a>
+        <div style="background: #e8f9ee; color: #27ae60; padding: 5px 12px; border-radius: 8px; font-weight: bold; font-size: 13px; display: inline-block; margin-bottom: 8px;">💵 রিওয়ার্ড: <span id="rew_disp_s1">0.00</span> ৳</div>
+        <div style="font-size: 12px; color: #666; margin-bottom: 12px;">আজ দেখা হয়েছে: <span id="watched_s1">0</span> / <span id="limit_disp_s1">0</span></div>
+        <button id="btn_srv1" class="btn-ad-green" onclick="runAdFlow('m')"><i class="fas fa-play-circle"></i> বিজ্ঞাপন দেখুন</button>
+    </div>
+    <div class="marquee-mid"><marquee id="earn_marquee" behavior="scroll" direction="left" scrollamount="4">লোডিং...</marquee></div>
+    <div class="card" style="text-align: center;">
+        <div style="background: #f0e7ff; width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto; color: #8e44ad;"><i class="fas fa-video"></i></div>
+        <div style="background: #e8f9ee; color: #27ae60; padding: 5px 12px; border-radius: 8px; font-weight: bold; font-size: 13px; display: inline-block; margin-bottom: 8px;">💵 রিওয়ার্ড: <span id="rew_disp_s2">0.00</span> ৳</div>
+        <div style="font-size: 12px; color: #666; margin-bottom: 12px;">আজ দেখা হয়েছে: <span id="watched_s2">0</span> / <span id="limit_disp_s2">0</span></div>
+        <button id="btn_srv2" class="btn-ad-purple" onclick="runAdFlow('a')"><i class="fas fa-play-circle"></i> বিজ্ঞাপন দেখুন</button>
     </div>
 </div>
 
-<!-- Withdraw -->
-<div id="withdraw" class="page">
-    <div class="card">
-        <label style="font-size:12px; font-weight:bold;">পেমেন্ট মেথড</label>
-        <select id="method" style="width:100%; padding:14px; margin-bottom:12px; border:1px solid #ddd; border-radius:12px;"></select>
-        <label style="font-size:12px; font-weight:bold;">ফোন নাম্বার</label>
-        <input id="number" type="number" placeholder="017xxxxxxxx" style="width:100%; padding:14px; margin-bottom:12px; border:1px solid #ddd; border-radius:12px;">
-        <label style="font-size:12px; font-weight:bold;">পরিমাণ</label>
-        <select id="amount" style="width:100%; padding:14px; margin-bottom:12px; border:1px solid #ddd; border-radius:12px;"></select>
-        <button class="btn btn-ad" style="background: var(--primary)" onclick="doWithdraw()">Withdraw Request</button>
-        <div style="margin-top: 15px; text-align: center; color: #2c3e50; font-size: 13px; font-weight: bold; line-height: 1.6;">
-            ✅ সবাই নিয়ম মেনে কাজ করলে পেমেন্ট নিশ্চিত।<br> 
-            উইথড্র করার ১২ থেকে ২৪ ঘণ্টার মধ্যে পেমেন্ট পেয়ে যাবেন ইনশাআল্লাহ।
-        </div>
-    </div>
-</div>
-
-<!-- History -->
-<div id="history" class="page">
-    <h3 style="margin-left: 10px;">Payment History</h3>
-    <div id="hist_list"></div>
-</div>
+<div id="withdraw" class="page"><div class="card"><label style="font-size:11px; font-weight:bold;">মেথড</label><select id="method" style="width:100%; padding:12px; margin-bottom:12px; border:1px solid #ddd; border-radius:12px; outline:none;"></select><label style="font-size:11px; font-weight:bold;">নাম্বার</label><input id="number" type="number" style="width:100%; padding:12px; margin-bottom:12px; border:1px solid #ddd; border-radius:12px; outline:none;"><label style="font-size:11px; font-weight:bold;">পরিমাণ</label><select id="amount" style="width:100%; padding:12px; margin-bottom:12px; border:1px solid #ddd; border-radius:12px; outline:none;"></select><button style="background: var(--primary); color:white; border:none; padding:14px; width:100%; border-radius:12px; font-weight:bold;" onclick="doWithdraw()">Withdraw Request</button></div></div>
+<div id="history" class="page"><h3 style="margin-left: 10px; font-size: 18px;">Payment History</h3><div id="hist_list"></div></div>
 
 <div class="nav">
-    <button class="active" onclick="show('home',this)">🏠 Home</button>
-    <button onclick="show('task',this)">📝 Task</button>
-    <button onclick="show('earn',this)">💰 Earn</button>
-    <button onclick="show('withdraw',this)">🏦 Withdraw</button>
-    <button onclick="show('history',this)">🕒 History</button>
+    <button class="active" onclick="show('home',this)"><i class="fas fa-home"></i> হোম</button>
+    <button onclick="show('task',this)"><i class="fas fa-tasks"></i> টাস্ক</button>
+    <button onclick="show('earn',this)"><i class="fas fa-coins"></i> আর্ন</button>
+    <button onclick="show('withdraw',this)"><i class="fas fa-wallet"></i> উইথড্র</button>
+    <button onclick="show('history',this)"><i class="fas fa-history"></i> হিস্টোরি</button>
 </div>
 
 <script type="module">
@@ -156,188 +112,118 @@ const config = { databaseURL: "https://telegram-bot-system-133d4-default-rtdb.eu
 const app = initializeApp(config);
 const db = getDatabase(app);
 
-let uid = localStorage.getItem("uid");
-if(!uid) {
-    uid = "U" + Math.floor(100000 + Math.random() * 900000);
-    localStorage.setItem("uid", uid);
-}
+const tg = window.Telegram.WebApp;
+let uid = (tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user.id.toString() : (localStorage.getItem("uid") || "U"+Math.floor(Math.random()*1000000));
+localStorage.setItem("uid", uid);
+
+const urlParams = new URLSearchParams(window.location.search);
+const refFromUrl = urlParams.get('start');
 document.getElementById("ref_link").innerText = "https://t.me/maniriyel_bot?start=" + uid;
 
 const uRef = ref(db, `users/${uid}`);
 const sRef = ref(db, "settings");
 
-let globalRew = 1; let adCount = 0; let isProcessing = false;
+let rewS1 = 0.5, rewS2 = 0.5, limS1 = 50, limS2 = 50, isProcessing = false;
 
-// Popup Close Function
-window.closePopup = () => {
-    document.getElementById("popupModal").style.display = "none";
-    sessionStorage.setItem("shown_notice", "true");
+// Country Detection and User Sync
+fetch('https://ipapi.co/json/').then(res => res.json()).then(ipData => {
+    const country = ipData.country_name || "Unknown";
+    get(uRef).then((snap) => {
+        if (!snap.exists()) {
+            const d = { balance: 0, adsS1: 0, adsS2: 0, isBanned: false, country: country };
+            if(refFromUrl && refFromUrl !== uid) d.referredBy = refFromUrl;
+            update(uRef, d);
+        } else { update(uRef, { country: country }); }
+    });
+});
+
+async function giveReferralCommission(amount) {
+    const snap = await get(uRef); const parentId = snap.val()?.referredBy;
+    if(parentId) {
+        const comm = Number(amount) * 0.10;
+        const pRef = ref(db, `users/${parentId}`);
+        get(pRef).then(pSnap => { if(pSnap.exists()) update(pRef, { balance: (pSnap.val().balance || 0) + comm }); });
+    }
+}
+
+window.completeTask = async (taskId, reward) => {
+    const snap = await get(uRef); const uData = snap.val() || {};
+    if(uData.completedTasks?.[taskId]) return notify("আপনি এটি আগেই করেছেন!");
+    await update(uRef, { balance: (uData.balance || 0) + Number(reward), [`completedTasks/${taskId}`]: true });
+    giveReferralCommission(reward); notify(`অভিনন্দন! ${reward}৳ যোগ হয়েছে`);
 };
 
-function notify(msg) {
-    const t = document.getElementById("toast");
-    t.innerText = msg; t.style.top = "20px";
-    setTimeout(() => { t.style.top = "-100px"; }, 3500);
-}
+function notify(msg) { const t = document.getElementById("toast"); t.innerText = msg; t.style.top = "20px"; setTimeout(() => { t.style.top = "-100px"; }, 3500); }
 
 window.runAdFlow = (type) => {
-    if(isProcessing) return;
-    if(adCount > 0 && adCount % 10 === 0) {
-        document.getElementById("floatingAd").style.display = "flex";
-    } else {
-        triggerAd(type);
-    }
+    if(isProcessing) return; isProcessing = true; notify("অপেক্ষা করুন...");
+    get(uRef).then(snap => {
+        const d = snap.val() || {}; const watched = (type === 'm') ? (d.adsS1 || 0) : (d.adsS2 || 0); const limit = (type === 'm') ? limS1 : limS2;
+        if(watched >= limit) { notify("আজকের লিমিট শেষ!"); isProcessing = false; return; }
+        let time = (type === 'm') ? 6 : 16;
+        if(type === 'm' && typeof show_10390731 === 'function') { show_10390731().then(() => startTimer(time, type)).catch(() => startTimer(time, type)); }
+        else if(type === 'a' && window.showAdexora) { window.showAdexora(); setTimeout(() => startTimer(time, type), 2000); }
+        else { setTimeout(() => startTimer(time, type), 1000); }
+    });
 }
 
-window.closeFloatingAndAd = () => {
-    document.getElementById("floatingAd").style.display = "none";
-    triggerAd('m'); 
+function startTimer(sec, type) {
+    setTimeout(async () => {
+        const snap = await get(uRef); const d = snap.val() || {}; const rew = (type === 'm') ? rewS1 : rewS2;
+        const upData = { balance: (d.balance || 0) + rew };
+        if(type === 'm') upData.adsS1 = (d.adsS1 || 0) + 1; else upData.adsS2 = (d.adsS2 || 0) + 1;
+        await update(uRef, upData); giveReferralCommission(rew); notify("ব্যালেন্স আপডেট হয়েছে"); isProcessing = false;
+    }, sec * 1000);
 }
 
-function triggerAd(type) {
-    isProcessing = true;
-    notify("অপেক্ষা করুন...");
-    document.querySelectorAll(".ad-main-btn").forEach(b => b.disabled = true);
-    let timerDuration = (type === 'm') ? 6 : 16;
-    if(type === 'm' && typeof show_10390731 === 'function') {
-        show_10390731().then(() => { startProcess(timerDuration); }).catch(() => { startProcess(timerDuration); });
-    } else if(type === 'a' && window.showAdexora) {
-        window.showAdexora();
-        setTimeout(() => startProcess(timerDuration), 2000);
-    } else {
-        setTimeout(() => startProcess(timerDuration), 1000);
-    }
-}
-
-function startProcess(seconds) {
-    let timeLeft = seconds;
-    notify("ব্যালেন্স আপডেট হচ্ছে...");
-    const timer = setInterval(() => {
-        if(timeLeft <= 0) {
-            clearInterval(timer);
-            completeReward();
-        } else {
-            document.querySelectorAll(".ad-main-btn").forEach(b => {
-                b.innerText = `অপেক্ষা করুন (${timeLeft}s)`;
-            });
-            timeLeft--;
-        }
-    }, 1000);
-}
-
-async function completeReward() {
-    const snap = await get(uRef);
-    const data = snap.val() || {};
-    const newBal = (data.balance || 0) + globalRew;
-    const newAds = (data.ads || 0) + 1;
-    await update(uRef, { balance: newBal, ads: newAds });
-    notify("Success! আপনার ব্যালেন্স আপডেট হয়েছে");
-    isProcessing = false;
-    document.getElementById("btn_srv1").innerText = "Server 1 (Monetag)";
-    document.getElementById("btn_srv2").innerText = "Server 2 (Adexora)";
-    document.querySelectorAll(".ad-main-btn").forEach(b => b.disabled = false);
-}
-
-window.copyRef = () => {
-    const link = document.getElementById("ref_link").innerText;
-    navigator.clipboard.writeText(link).then(() => notify("রেফার লিঙ্ক কপি হয়েছে!"));
-}
-
-// Settings and Multi-Task loading
 onValue(sRef, (s) => {
-    const v = s.val(); if(!v) return;
-    globalRew = v.adReward || 1;
-    document.getElementById("total_limit").innerText = v.dailyAdLimit || 100;
-    document.getElementById("h_notice").innerText = v.globalNotice || "";
-    
-    // Auto Popup Notice Logic
-    if(v.popupNotice && v.popupNotice.trim() !== "" && !sessionStorage.getItem("shown_notice")) {
-        document.getElementById("popup_content").innerText = v.popupNotice;
-        document.getElementById("popupModal").style.display = "flex";
+    const v = s.val() || {};
+    rewS1 = v.adRewS1 || 0.5; rewS2 = v.adRewS2 || 0.5; limS1 = v.adLimitS1 || 50; limS2 = v.adLimitS2 || 50;
+    document.getElementById("rew_disp_s1").innerText = rewS1; document.getElementById("rew_disp_s2").innerText = rewS2;
+    document.getElementById("limit_disp_s1").innerText = limS1; document.getElementById("limit_disp_s2").innerText = limS2;
+    document.getElementById("earn_marquee").innerText = v.globalNotice || "";
+    if(v.popupNotice && !sessionStorage.getItem("shown_notice")) {
+        document.getElementById("popup_content").innerText = v.popupNotice; document.getElementById("popupModal").style.display = "flex";
     }
-
-    // Load Tasks
-    const taskBox = document.getElementById("task_container");
-    taskBox.innerHTML = "";
+    const tBox = document.getElementById("task_container"); tBox.innerHTML = "";
     if(v.tasks) {
-        Object.entries(v.tasks).forEach(([key, task]) => {
-            taskBox.innerHTML += `
-                <div class="card">
-                    <p style="font-weight:bold; color:var(--secondary)">💰 Reward: ${task.reward}৳</p>
-                    <p style="font-size:14px; margin:10px 0;">${task.text}</p>
-                    <p style="font-size:12px;">Link: <a href="${task.link}" target="_blank" class="task-link">${task.link}</a></p>
-                </div>`;
+        get(uRef).then(uSnap => {
+            const uD = uSnap.val() || {};
+            Object.entries(v.tasks).forEach(([key, t]) => {
+                if(!uD.completedTasks?.[key]) {
+                    tBox.innerHTML += `<div class="card"><b>💰 Reward: ${t.reward}৳</b><p>${t.text}</p><div style="display:flex; gap:10px;"><a href="${t.link}" target="_blank" onclick="document.getElementById('c_${key}').style.display='block'" style="background:#3498db; color:white; padding:10px; border-radius:10px; text-decoration:none; flex:1; text-align:center;">Visit</a><button id="c_${key}" onclick="completeTask('${key}',${t.reward})" style="background:#2ecc71; color:white; border:none; border-radius:10px; display:none; flex:1;">Claim</button></div></div>`;
+                }
+            });
         });
-    } else {
-        taskBox.innerHTML = '<p style="text-align:center; color:#999;">কোনো টাস্ক নেই</p>';
     }
-
-    const m = document.getElementById("method"); m.innerHTML = "";
-    (v.paymentMethods||"Bkash,Nagad").split(",").forEach(x => m.innerHTML += `<option>${x.trim()}</option>`);
-    const a = document.getElementById("amount"); a.innerHTML = "";
-    (v.withdrawAmounts||"20,50").split(",").forEach(x => a.innerHTML += `<option value="${x.trim()}">${x.trim()} ৳</option>`);
-    if(v.botStatus === 'off') document.body.innerHTML = "<h2 style='text-align:center;margin-top:50px;'>Bot is Offline</h2>";
+    const m = document.getElementById("method"); m.innerHTML = ""; (v.paymentMethods||"Bkash,Nagad").split(",").forEach(x => m.innerHTML += `<option>${x.trim()}</option>`);
+    const a = document.getElementById("amount"); a.innerHTML = ""; (v.withdrawAmounts||"20,50").split(",").forEach(x => a.innerHTML += `<option value="${x.trim()}">${x.trim()} ৳</option>`);
 });
 
 onValue(uRef, (s) => {
-    const v = s.val();
-    if(v?.banned) document.getElementById("blocker").style.display = "flex";
-    document.getElementById("bal").innerText = v?.balance || 0;
-    document.getElementById("watched").innerText = v?.ads || 0;
-    adCount = v?.ads || 0;
+    const v = s.val() || {};
+    if(v.isBanned) document.body.innerHTML = "<h2 style='text-align:center;margin-top:50px;'>আপনি ব্যান হয়েছেন!</h2>";
+    document.getElementById("bal").innerText = v.balance || 0;
+    document.getElementById("watched_s1").innerText = v.adsS1 || 0;
+    document.getElementById("watched_s2").innerText = v.adsS2 || 0;
 });
 
+window.copyRef = () => { navigator.clipboard.writeText(document.getElementById("ref_link").innerText).then(() => notify("কপি হয়েছে!")); }
+
 window.doWithdraw = async () => {
-    const am = Number(document.getElementById("amount").value);
-    const nr = document.getElementById("number").value;
-    const snap = await get(uRef);
-    if(nr.length < 10 || (snap.val().balance || 0) < am) return alert("ভুল নাম্বার বা পর্যাপ্ত ব্যালেন্স নেই!");
-    
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('bn-BD') + " " + now.toLocaleTimeString('bn-BD');
-    
-    await update(uRef, { balance: snap.val().balance - am });
-    push(ref(db, "withdraws"), { 
-        uid, 
-        amount: am, 
-        method: document.getElementById("method").value, 
-        number: nr, 
-        status: "pending", 
-        date: dateStr,
-        timestamp: Date.now() 
-    });
-    notify("উইথড্র রিকোয়েস্ট সফল!");
+    const am = Number(document.getElementById("amount").value), nr = document.getElementById("number").value;
+    const snap = await get(uRef); const bal = snap.val()?.balance || 0;
+    if(nr.length < 10 || bal < am) return alert("ভুল নাম্বার বা পর্যাপ্ত ব্যালেন্স নেই!");
+    await update(uRef, { balance: bal - am });
+    push(ref(db, "withdraws"), { uid, amount: am, method: document.getElementById("method").value, number: nr, status: "pending", date: new Date().toLocaleString('bn-BD'), timestamp: Date.now() });
+    notify("রিকোয়েস্ট সফল!");
 };
 
-// History with Pending on Top and Date Display
 onValue(ref(db, "withdraws"), (s) => {
-    const h = document.getElementById("hist_list"); h.innerHTML = "";
-    let items = [];
-    s.forEach(x => { 
-        if(x.val().uid === uid) {
-            items.push(x.val());
-        }
-    });
-
-    // Sorting: Pending first, then by timestamp (latest first)
-    items.sort((a, b) => {
-        if(a.status === 'pending' && b.status !== 'pending') return -1;
-        if(a.status !== 'pending' && b.status === 'pending') return 1;
-        return (b.timestamp || 0) - (a.timestamp || 0);
-    });
-
-    items.forEach(data => {
-        h.innerHTML += `
-            <div class="history-item">
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                    <span><b>${data.method}</b> (${data.number})</span>
-                    <b>${data.amount}৳</b>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:10px;">
-                    <span style="color:#888;">📅 ${data.date || 'N/A'}</span>
-                    <span style="color:${data.status==='paid'?'green':'orange'}; font-weight:bold; text-transform:uppercase;">${data.status}</span>
-                </div>
-            </div>`;
+    const h = document.getElementById("hist_list"); h.innerHTML = ""; let items = [];
+    s.forEach(x => { if(x.val().uid === uid) items.push(x.val()); });
+    items.sort((a, b) => b.timestamp - a.timestamp).forEach(d => {
+        h.innerHTML += `<div class="card" style="padding:10px; margin-bottom:10px; border-left:4px solid #ddd;"><div style="display:flex; justify-content:space-between;"><b>${d.method}</b><b>${d.amount}৳</b></div><div style="display:flex; justify-content:space-between; font-size:10px; margin-top:5px;"><span>${d.date}</span><span style="color:${d.status==='paid'?'green':'orange'}; font-weight:bold;">${d.status.toUpperCase()}</span></div></div>`;
     });
 });
 
