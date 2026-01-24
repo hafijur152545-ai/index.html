@@ -11,7 +11,7 @@
 
 <style>
 :root { --primary: #ff4fa3; --secondary: #8e44ad; --dark: #2c3e50; --success: #2ecc71; --glass: rgba(255, 255, 255, 0.95); }
-body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; color: #333; padding-bottom: 70px; }
+body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; color: #333; padding-bottom: 110px; }
 .header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; padding: 25px 15px; text-align: center; border-radius: 0 0 30px 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 .balance { font-size: 28px; font-weight: 800; display: block; margin-top: 5px; }
 .page { display:none; padding:15px; animation: fadeIn 0.4s ease; }
@@ -37,7 +37,9 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 .status-pending { border-left-color: #f1c40f; } .status-paid { border-left-color: #2ecc71; } .status-rejected { border-left-color: #e74c3c; }
 #blocker { position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; box-sizing:border-box; }
 
-.notice-box { background: #fff; padding: 10px; border-radius: 10px; border-left: 4px solid var(--primary); margin-top: 10px; font-size: 14px; line-height: 1.5; color: #555; }
+/* Fixed Notice Box */
+.notice-box-fixed { position: fixed; bottom: 58px; left: 0; width: 100%; background: #fff; border-top: 1px solid #eee; padding: 8px 0; z-index: 99; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+.notice-box-fixed marquee { color: #d63031; font-weight: 600; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -52,6 +54,11 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 <div class="header">
     💰 <b>Earn Money Bot</b><br>
     <span class="balance"><span id="bal">0</span> ৳</span>
+</div>
+
+<!-- FIXED NOTICE -->
+<div class="notice-box-fixed">
+   <marquee behavior="scroll" direction="left">আপনারা নিয়ম মেনে কাজ করবেন সবাই না হলে পেমেন্ট পাবেন না সবাই ১০ টা এড দেকে একটা এডের ওপর কিলিক করে ২০ সেকেন্ড অপেক্ষা করবেন।</marquee>
 </div>
 
 <!-- HOME -->
@@ -74,16 +81,13 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
         <a href="https://t.me/takariyel" class="btn-round bg-blue">বট আপডেট গ্রুপ</a>
         <a href="https://t.me/hafijur152" class="btn-round bg-green">সাপোর্ট</a>
     </div>
-    <div class="notice-box">
-       <marquee behavior="scroll" direction="left">আপনারা নিয়ম মেনে কাজ করবেন সবাই না হলে পেমেন্ট পাবেন না সবাই ১০ টা এড দেকে একটা এডের ওপর কিলিক করে ২০ সেকেন্ড অপেক্ষা করবেন।</marquee>
-    </div>
 </div>
 
 <!-- EARN -->
 <div id="earn" class="page">
     <div class="card" style="text-align: center;">
-        <button class="btn btn-ad" onclick="watchMonetag()">📢 অ্যাড দেখুন (সার্ভার ১)</button>
-        <button class="btn btn-ad" onclick="watchAdexora()">📢 অ্যাড দেখুন (সার্ভার ২)</button>
+        <button id="btn_srv1" class="btn btn-ad" onclick="watchMonetag()">📢 অ্যাড দেখুন (সার্ভার ১)</button>
+        <button id="btn_srv2" class="btn btn-ad" onclick="watchAdexora()">📢 অ্যাড দেখুন (সার্ভার ২)</button>
         <div style="margin:20px 0; background: #f8f9fa; padding: 15px; border-radius: 15px;">
             আজকের টাস্ক: <b><span id="watched">0</span> / <span id="total_limit">100</span></b>
         </div>
@@ -99,13 +103,13 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 <div id="withdraw" class="page">
     <div class="card">
         <label>পেমেন্ট মেথড</label>
-        <!-- এটি এখন ডায়নামিক হবে -->
         <select id="method" style="width:100%; padding:14px; margin-bottom:12px; border:1.5px solid #eee; border-radius:12px;">
             <option>Loading...</option>
         </select>
         <input id="number" type="number" placeholder="017xxxxxxxx" style="width:100%; padding:14px; margin-bottom:12px; border:1.5px solid #eee; border-radius:12px;">
+        <label>উইথড্র এমাউন্ট</label>
         <select id="amount" style="width:100%; padding:14px; margin-bottom:12px; border:1.5px solid #eee; border-radius:12px;">
-            <option value="50">50 ৳</option><option value="100">100 ৳</option><option value="200">200 ৳</option>
+            <!-- এমাউন্ট এডমিন প্যানেল থেকে আসবে -->
         </select>
         <button class="btn btn-pink" onclick="withdraw()">Withdraw Request</button>
     </div>
@@ -165,14 +169,20 @@ onValue(settingsRef, s => {
     if(!s.exists()) return;
     const v = s.val();
     
-    // ডায়নামিক পেমেন্ট মেথড আপডেট লজিক
+    // ডায়নামিক পেমেন্ট মেথড
     if(v.paymentMethods){
         const methodSelect = document.getElementById("method");
         const methods = v.paymentMethods.split(","); 
         methodSelect.innerHTML = ""; 
-        methods.forEach(m => {
-            if(m.trim() !== "") methodSelect.innerHTML += `<option value="${m.trim()}">${m.trim()}</option>`;
-        });
+        methods.forEach(m => { if(m.trim() !== "") methodSelect.innerHTML += `<option value="${m.trim()}">${m.trim()}</option>`; });
+    }
+
+    // এডমিন প্যানেল থেকে উইথড্র এমাউন্ট লোড
+    if(v.withdrawAmounts){
+        const amtSelect = document.getElementById("amount");
+        const amounts = v.withdrawAmounts.split(",");
+        amtSelect.innerHTML = "";
+        amounts.forEach(a => { if(a.trim() !== "") amtSelect.innerHTML += `<option value="${a.trim()}">${a.trim()} ৳</option>`; });
     }
 
     DAILY_LIMIT = v.dailyAdLimit || 100;
@@ -202,8 +212,21 @@ onValue(userRef, s => {
     if(now.toLocaleDateString() !== lastReset && now.getHours() >= 6) {
         update(userRef, { ads: 0, lastReset: now.toLocaleDateString() });
     }
+    
+    const count = v.ads || 0;
     document.getElementById("bal").innerText = v.balance || 0;
-    document.getElementById("watched").innerText = v.ads || 0;
+    document.getElementById("watched").innerText = count;
+
+    // সার্ভার বাটনের লেখা আপডেট (প্রতি ১০ অ্যাড পর পর ক্লিক মেসেজ)
+    const btn1 = document.getElementById("btn_srv1");
+    const btn2 = document.getElementById("btn_srv2");
+    if(count > 0 && count % 10 === 0){
+        btn1.innerText = "এডের উপর ক্লিক করে ২০ সেকেন্ড অপেক্ষা করুন";
+        btn2.innerText = "এডের উপর ক্লিক করে ২০ সেকেন্ড অপেক্ষা করুন";
+    } else {
+        btn1.innerText = "📢 অ্যাড দেখুন (সার্ভার ১)";
+        btn2.innerText = "📢 অ্যাড দেখুন (সার্ভার ২)";
+    }
 });
 
 window.addReward = async () => {
@@ -211,14 +234,16 @@ window.addReward = async () => {
     const count = s.val().ads || 0;
     if(count >= DAILY_LIMIT) return notify("লিমিট শেষ!", "red");
     update(userRef, { balance: (s.val().balance || 0) + AD_REWARD, ads: count + 1 });
-    notify("টাস্ক সফল! ✅", "green");
+    // Success মেসেজ আপডেট করা হলো
+    notify("Success Task! আপনার ব্যালেন্স আপডেট হয়েছে", "green");
 }
 
 window.watchMonetag = () => { show_10390731(); setTimeout(addReward, 10000); };
 window.watchAdexora = () => { if(window.showAdexora) { window.showAdexora(); setTimeout(addReward, 10000); } };
 
 window.withdraw = async () => {
-    const amt = Number(document.getElementById("amount").value);
+    const amtSelect = document.getElementById("amount");
+    const amt = Number(amtSelect.value);
     const num = document.getElementById("number").value;
     const method = document.getElementById("method").value;
     const s = await get(userRef);
