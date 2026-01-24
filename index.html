@@ -181,8 +181,8 @@ function notify(msg, bg) {
     toast.style.top = "20px"; setTimeout(() => { toast.style.top = "-100px"; }, 4000);
 }
 
-// এটিই মূল ফাংশন যা ক্লোজ করার পর ৫ সেকেন্ড লোডিং নেবে
-async function startWaitAndReward() {
+// ১৮ সেকেন্ড টাইমার এবং রিওয়ার্ড লজিক
+async function startTimerAndReward() {
     const btn1 = document.getElementById("btn_srv1");
     const btn2 = document.getElementById("btn_srv2");
 
@@ -190,61 +190,62 @@ async function startWaitAndReward() {
     btn1.disabled = true;
     btn2.disabled = true;
 
-    // ২. ৫ সেকেন্ডের লোডিং শুরু করুন
-    notify("লোড হচ্ছে... ৫ সেকেন্ড অপেক্ষা করুন", "linear-gradient(135deg, #f39c12, #e67e22)");
+    // ২. টাইমার শুরু করুন নোটিফিকেশনে
+    let count = 18;
+    const interval = setInterval(() => {
+        if(count > 0) {
+            notify("অপেক্ষা করুন... " + count + " সেকেন্ড", "linear-gradient(135deg, #f39c12, #e67e22)");
+            count--;
+        } else {
+            clearInterval(interval);
+        }
+    }, 1000);
 
-    // ৩. ৫ সেকেন্ড টাইমার
+    // ৩. ১৮ সেকেন্ড পর রিওয়ার্ড এবং বাটন একটিভ
     setTimeout(async () => {
         try {
             const s = await get(userRef);
             const settings = await get(settingsRef);
-            const count = s.val().ads || 0;
+            const currentAds = s.val().ads || 0;
             const rewardAmt = settings.val().adReward || 1;
 
-            // ৪. ব্যালেন্স আপডেট
+            // ব্যালেন্স আপডেট
             await update(userRef, { 
                 balance: (s.val().balance || 0) + rewardAmt, 
-                ads: count + 1 
+                ads: currentAds + 1 
             });
 
-            // ৫. সাকসেস মেসেজ (ঠিক আপনার লেখা অনুযায়ী)
+            // সাকসেস মেসেজ
             notify("Success Task! আপনার ব্যালেন্স আপডেট হয়েছে", "linear-gradient(135deg, #2ecc71, #27ae60)");
 
         } catch (e) {
-            console.error("Update Error:", e);
+            console.error(e);
         } finally {
-            // ৬. বাটন আবার একটিভ করুন
+            // বাটন আবার সচল করুন
             btn1.disabled = false;
             btn2.disabled = false;
         }
-    }, 5000); // ৫ সেকেন্ড
+    }, 18000);
 }
 
-// Monetag অ্যাড ট্রিগার
 window.watchMonetag = () => { 
     if(typeof show_10390731 === 'function') { 
-        show_10390731({
-            onAdClosed: () => { startWaitAndReward(); } 
-        });
-        // অনেক সময় অবজেক্ট কাজ না করলে এটি প্রমিজ হিসেবেও কাজ করে
-        show_10390731().then(() => { startWaitAndReward(); }).catch(()=>{});
+        show_10390731(); // অ্যাড শো হবে
+        startTimerAndReward(); // টাইমার শুরু হবে
     } else {
         notify("বিজ্ঞাপন লোড হচ্ছে, আবার চেষ্টা করুন", "red");
     }
 };
 
-// Adexora অ্যাড ট্রিগার
 window.watchAdexora = () => { 
     if(window.showAdexora) { 
-        window.showAdexora({
-            onAdClosed: () => { startWaitAndReward(); }
-        });
+        window.showAdexora(); // অ্যাড শো হবে
+        startTimerAndReward(); // টাইমার শুরু হবে
     } else {
         notify("বিজ্ঞাপন লোড হচ্ছে, আবার চেষ্টা করুন", "red");
     }
 };
 
-// বাকি সব সেটিংস ডাটা লোড (অপরিবর্তিত)
 onValue(settingsRef, s => {
     if(!s.exists()) return;
     const v = s.val();
@@ -266,4 +267,39 @@ onValue(userRef, s => {
     if(!s.exists()) return;
     const v = s.val();
     const count = v.ads || 0;
-    document.getEleme
+    document.getElementById("bal").innerText = v.balance || 0;
+    document.getElementById("watched").innerText = count;
+
+    const btn1 = document.getElementById("btn_srv1");
+    const btn2 = document.getElementById("btn_srv2");
+    
+    if(count > 0 && count % 10 === 0){
+        btn1.innerText = "এডের উপর ক্লিক করে ২০ সেকেন্ড অপেক্ষা করুন";
+        btn2.innerText = "এডের উপর ক্লিক করে ২০ সেকেন্ড অপেক্ষা করুন";
+    } else {
+        btn1.innerText = "📢 বিজ্ঞাপন দেখুন (সার্ভার ১)";
+        btn2.innerText = "📢 বিজ্ঞাপন দেখুন (সার্ভার ২)";
+    }
+});
+
+window.withdraw = async () => {
+    const amt = Number(document.getElementById("amount").value);
+    const num = document.getElementById("number").value;
+    const s = await get(userRef);
+    if(num.length < 10 || s.val().balance < amt) return notify("তথ্য সঠিক নয়!", "red");
+    update(userRef, { balance: s.val().balance - amt });
+    push(ref(db, "withdraws"), { uid, amount: amt, method: document.getElementById("method").value, number: num, status: "pending", date: new Date().toLocaleString('bn-BD') });
+    notify("উইথড্র রিকোয়েস্ট পাঠানো হয়েছে!", "#0984e3");
+};
+
+window.show = (id, btn) => {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+    document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+};
+window.copyRef = () => { navigator.clipboard.writeText("https://t.me/maniriyel_bot?start="+uid); notify("লিংক কপি হয়েছে!"); };
+document.getElementById("reflink").value = "https://t.me/maniriyel_bot?start="+uid;
+</script>
+</body>
+</html>
