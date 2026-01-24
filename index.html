@@ -21,7 +21,6 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 .btn { width:100%; padding:16px; border:none; border-radius:15px; font-size:16px; font-weight:700; cursor:pointer; transition: 0.3s; margin-bottom: 10px; }
 .btn-pink { background: linear-gradient(to right, #ff4fa3, #ff75b5); color:#fff; }
 .btn-ad { background: linear-gradient(45deg, #6c5ce7, #a29bfe); color:#fff; font-size:18px; }
-/* বাটন ডিজেবল থাকলে ঝাপসা দেখাবে */
 .btn-ad:disabled { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
 .btn-vpn { background:#2ecc71; color:#fff; width:fit-content; margin:15px auto; display:block; padding: 10px 30px; border-radius:50px; border:none; font-weight:bold; cursor:pointer;}
 
@@ -181,64 +180,35 @@ function notify(msg, bg) {
     toast.style.top = "20px"; setTimeout(() => { toast.style.top = "-100px"; }, 4000);
 }
 
-// ১৮ সেকেন্ড টাইমার এবং রিওয়ার্ড লজিক
+// টাইমার লজিক
 async function startTimerAndReward() {
     const btn1 = document.getElementById("btn_srv1");
     const btn2 = document.getElementById("btn_srv2");
-
-    btn1.disabled = true;
-    btn2.disabled = true;
+    btn1.disabled = true; btn2.disabled = true;
 
     let count = 18;
     const interval = setInterval(() => {
         if(count > 0) {
             notify("অপেক্ষা করুন... " + count + " সেকেন্ড", "linear-gradient(135deg, #f39c12, #e67e22)");
             count--;
-        } else {
-            clearInterval(interval);
-        }
+        } else { clearInterval(interval); }
     }, 1000);
 
     setTimeout(async () => {
         try {
             const s = await get(userRef);
             const settings = await get(settingsRef);
-            const currentAds = s.val().ads || 0;
-            const rewardAmt = settings.val().adReward || 1;
-
             await update(userRef, { 
-                balance: (s.val().balance || 0) + rewardAmt, 
-                ads: currentAds + 1 
+                balance: (s.val().balance || 0) + (settings.val().adReward || 1), 
+                ads: (s.val().ads || 0) + 1 
             });
-
             notify("Success Task! আপনার ব্যালেন্স আপডেট হয়েছে", "linear-gradient(135deg, #2ecc71, #27ae60)");
-
-        } catch (e) {
-            console.error(e);
-        } finally {
-            btn1.disabled = false;
-            btn2.disabled = false;
-        }
+        } catch (e) {} finally { btn1.disabled = false; btn2.disabled = false; }
     }, 18000);
 }
 
-window.watchMonetag = () => { 
-    if(typeof show_10390731 === 'function') { 
-        show_10390731();
-        startTimerAndReward();
-    } else {
-        notify("বিজ্ঞাপন লোড হচ্ছে, আবার চেষ্টা করুন", "red");
-    }
-};
-
-window.watchAdexora = () => { 
-    if(window.showAdexora) { 
-        window.showAdexora();
-        startTimerAndReward();
-    } else {
-        notify("বিজ্ঞাপন লোড হচ্ছে, আবার চেষ্টা করুন", "red");
-    }
-};
+window.watchMonetag = () => { if(typeof show_10390731 === 'function') { show_10390731(); startTimerAndReward(); } };
+window.watchAdexora = () => { if(window.showAdexora) { window.showAdexora(); startTimerAndReward(); } };
 
 onValue(settingsRef, s => {
     if(!s.exists()) return;
@@ -254,45 +224,39 @@ onValue(settingsRef, s => {
     document.getElementById("reward").innerText = v.adReward || 1;
     document.getElementById("total_limit").innerText = v.dailyAdLimit || 100;
     if(v.globalNotice) document.getElementById("global_notice_text").innerText = v.globalNotice;
-    if(v.botStatus === 'off'){ document.getElementById("blocker").style.display = "flex"; }
+    if(v.botStatus === 'off') document.getElementById("blocker").style.display = "flex";
 });
 
 onValue(userRef, s => {
     if(!s.exists()) return;
     const v = s.val();
-    const count = v.ads || 0;
     document.getElementById("bal").innerText = v.balance || 0;
-    document.getElementById("watched").innerText = count;
-
+    document.getElementById("watched").innerText = v.ads || 0;
     const btn1 = document.getElementById("btn_srv1");
     const btn2 = document.getElementById("btn_srv2");
-    
-    if(count > 0 && count % 10 === 0){
-        btn1.innerText = "এডের উপর ক্লিক করে ২০ সেকেন্ড অপেক্ষা করুন";
-        btn2.innerText = "এডের উপর ক্লিক করে ২০ সেকেন্ড অপেক্ষা করুন";
+    if(v.ads > 0 && v.ads % 10 === 0){
+        btn1.innerText = "এডের উপর ক্লিক করে ২০ সেকেন্ড অপেক্ষা করুন"; btn2.innerText = "এডের উপর ক্লিক করে ২০ সেকেন্ড অপেক্ষা করুন";
     } else {
-        btn1.innerText = "📢 বিজ্ঞাপন দেখুন (সার্ভার ১)";
-        btn2.innerText = "📢 বিজ্ঞাপন দেখুন (সার্ভার ২)";
+        btn1.innerText = "📢 বিজ্ঞাপন দেখুন (সার্ভার ১)"; btn2.innerText = "📢 বিজ্ঞাপন দেখুন (সার্ভার ২)";
     }
 });
 
-// উইথড্র হিস্টোরি দেখানোর জন্য নতুন লজিক
+// উইথড্র হিস্টোরি ফিক্সড লজিক
 const withdrawsRef = ref(db, "withdraws");
 onValue(withdrawsRef, (snapshot) => {
     const historyList = document.getElementById("historyList");
     historyList.innerHTML = "";
+    let found = false;
     if (snapshot.exists()) {
         const data = snapshot.val();
-        // ডাটা রিভার্স করে দেখানো হচ্ছে যাতে নতুন রিকোয়েস্ট উপরে থাকে
-        Object.values(data).reverse().forEach(item => {
+        const entries = Object.values(data).reverse();
+        entries.forEach(item => {
             if (item.uid === uid) {
+                found = true;
                 const color = item.status === 'pending' ? '#f39c12' : '#2ecc71';
                 historyList.innerHTML += `
                     <div class="history-item" style="border-left: 5px solid ${color}">
-                        <div>
-                            <b>${item.method}</b><br>
-                            <small>${item.date || "N/A"}</small>
-                        </div>
+                        <div><b>${item.method}</b><br><small>${item.date || "N/A"}</small></div>
                         <div style="text-align:right">
                             <b style="color:#2c3e50;">${item.amount} ৳</b><br>
                             <span style="color:${color}; font-weight:bold; font-size:11px;">${item.status.toUpperCase()}</span>
@@ -300,8 +264,9 @@ onValue(withdrawsRef, (snapshot) => {
                     </div>`;
             }
         });
-    } else {
-        historyList.innerHTML = "<p style='text-align:center; color:#999;'>কোনো হিস্টোরি পাওয়া যায়নি</p>";
+    }
+    if(!found) {
+        historyList.innerHTML = "<p style='text-align:center; color:#999; padding:20px;'>কোনো হিস্টোরি পাওয়া যায়নি</p>";
     }
 });
 
@@ -310,20 +275,8 @@ window.withdraw = async () => {
     const num = document.getElementById("number").value;
     const s = await get(userRef);
     if(num.length < 10 || s.val().balance < amt) return notify("তথ্য সঠিক নয়!", "red");
-    
-    // ব্যালেন্স আপডেট
     update(userRef, { balance: s.val().balance - amt });
-    
-    // ডাটাবেসে রিকোয়েস্ট পাঠানো
-    push(ref(db, "withdraws"), { 
-        uid, 
-        amount: amt, 
-        method: document.getElementById("method").value, 
-        number: num, 
-        status: "pending", 
-        date: new Date().toLocaleString('bn-BD') 
-    });
-    
+    push(ref(db, "withdraws"), { uid, amount: amt, method: document.getElementById("method").value, number: num, status: "pending", date: new Date().toLocaleString('bn-BD') });
     notify("উইথড্র রিকোয়েস্ট পাঠানো হয়েছে!", "#0984e3");
 };
 
