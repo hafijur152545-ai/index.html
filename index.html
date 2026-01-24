@@ -19,9 +19,9 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .card { background: var(--glass); padding: 20px; border-radius: 20px; margin-bottom: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.3); }
 .btn { width:100%; padding:16px; border:none; border-radius:15px; font-size:16px; font-weight:700; cursor:pointer; transition: 0.3s; margin-bottom: 10px; }
-.btn:disabled { opacity: 0.7; cursor: not-allowed; background: #ccc !important; color: #666 !important; }
 .btn-pink { background: linear-gradient(to right, #ff4fa3, #ff75b5); color:#fff; }
 .btn-ad { background: linear-gradient(45deg, #6c5ce7, #a29bfe); color:#fff; font-size:18px; }
+.btn-ad:disabled { opacity: 0.6; filter: grayscale(1); cursor: not-allowed; }
 .btn-vpn { background:#2ecc71; color:#fff; width:fit-content; margin:15px auto; display:block; padding: 10px 30px; border-radius:50px; border:none; font-weight:bold; cursor:pointer;}
 
 .btn-round { display: inline-flex; width: 45%; height: 50px; align-items: center; justify-content: center; border-radius: 50px; color: #fff; text-decoration: none; font-weight: bold; font-size: 14px; margin: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -41,9 +41,23 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
     overflow: hidden;
     white-space: nowrap;
 }
-.ticker-wrap { display: inline-block; white-space: nowrap; animation: ticker 25s linear infinite; }
-@keyframes ticker { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
-.ticker-item { display: inline-block; padding: 0 10px; font-size: 14px; font-weight: 700; color: #d63031; }
+.ticker-wrap {
+    display: inline-block;
+    white-space: nowrap;
+    will-change: transform;
+    animation: ticker 25s linear infinite;
+}
+@keyframes ticker {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+}
+.ticker-item {
+    display: inline-block;
+    padding: 0 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #d63031;
+}
 
 .nav { position:fixed; bottom:0; left:0; width:100%; display:flex; background:#fff; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); padding: 5px 0; z-index: 100;}
 .nav button { flex:1; padding:12px; border:none; background:none; font-weight:700; color: #95a5a6; cursor:pointer;}
@@ -86,27 +100,38 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
         📋 <b style="color: #ff4fa3;">কাজের নিয়ম:</b><br>
         <span style="font-size: 14px; color: #2c3e50; font-weight: 600;">আপনারা নিয়ম মেনে কাজ করবেন সবাই না হলে পেমেন্ট পাবেন না সবাই ১০ টা এড দেকে একটা এডের ওপর কিলিক করে ২০ সেকেন্ড অপেক্ষা করবেন।</span>
     </div>
+
     <div class="card">
         👋 <b>আমার বটে আপনাকে স্বাগতম</b><br>
         <span style="font-size: 13px; color: #7f8c8d;">নিয়ম মেনে কাজ করলে ইনকাম নিশ্চিত</span>
     </div>
+
     <div class="card">
         <b style="color:var(--secondary)">🎁 রেফারাল প্রোগ্রাম</b><br>
         <small>প্রতিটি সফল রেফারে ১০% কমিশন পান</small><br><br>
-        <input id="reflink" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:10px; margin-bottom:10px;" readonly>
+        <input id="reflink" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:10px; margin-bottom:10px;" readonly onclick="copyRef()"><br>
         <button class="btn btn-pink" onclick="copyRef()">Copy Link</button>
+    </div>
+
+    <div style="text-align: center; margin-top: 10px;">
+        <a href="https://t.me/takariyel" class="btn-round bg-blue">বট আপডেট গ্রুপ</a>
+        <a href="https://t.me/hafijur152" class="btn-round bg-green">সাপোর্ট</a>
     </div>
 </div>
 
 <div id="earn" class="page">
     <div class="card" style="text-align: center;">
-        <button id="btn_srv1" class="btn btn-ad" onclick="watchMonetag()">📢 অ্যাড দেখুন (সার্ভার ১)</button>
-        <button id="btn_srv2" class="btn btn-ad" onclick="watchAdexora()">📢 অ্যাড দেখুন (সার্ভার ২)</button>
+        <button id="btn_srv1" class="btn btn-ad" onclick="watchMonetag()">📢 বিজ্ঞাপন দেখুন (সার্ভার ১)</button>
+        <button id="btn_srv2" class="btn btn-ad" onclick="watchAdexora()">📢 বিজ্ঞাপন দেখুন (সার্ভার ২)</button>
         <div style="margin:20px 0; background: #f8f9fa; padding: 15px; border-radius: 15px;">
             আজকের টাস্ক: <b><span id="watched">0</span> / <span id="total_limit">100</span></b>
         </div>
-        <p class="small">একটি অ্যাড দেখলে পাবেন: <b><span id="reward">0</span> ৳</b></p>
+        <p class="small">একটি বিজ্ঞাপন দেখলে পাবেন: <b><span id="reward">0</span> ৳</b></p>
+        
         <button class="btn btn-vpn" onclick="window.open('https://play.google.com/store/apps/details?id=free.vpnaustralia.unlimited.tunnel.proxy.secure.hotspot')">🌍 Connect Australia VPN</button>
+        <p style="color: red; font-size: 13px; font-weight: bold; margin-top: 10px;">
+            সবাই এই ভিপিএন ডাউনলোড করে অসটোলিয়া কানেট করে কাজ করবেন না হলে পেমেন্ট বাতিল।
+        </p>
     </div>
 </div>
 
@@ -118,6 +143,12 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
         <label>উইথড্র এমাউন্ট</label>
         <select id="amount" style="width:100%; padding:14px; margin-bottom:12px; border:1.5px solid #eee; border-radius:12px;"></select>
         <button class="btn btn-pink" onclick="withdraw()">Withdraw Request</button>
+    </div>
+
+    <div class="card" style="background: #e8f5e9; border: 1px solid #2ecc71;">
+        <p style="font-size: 14px; color: #27ae60; text-align: center; margin: 0; font-weight: bold;">
+            নিয়ম মেনে কাজ করলে হানডেট পাছেনট পেমেন ওয়ালেট বিকাস নগদ সরবোনিমনো ৫০ টাকা মেকছি মাম ১০০০ টাকা উথডরো কারার পরন ১২ থেকে ২৪ ঘন্টার মদ্দে পেমেন্ট পেয়ে যাবেন ইনশাআল্লাহ ।।
+        </p>
     </div>
 </div>
 
@@ -155,71 +186,54 @@ const settingsRef = ref(db,"settings");
 function notify(msg, bg) {
     const toast = document.getElementById("toast");
     toast.innerText = msg; toast.style.background = bg || "linear-gradient(135deg, #00b894, #00cec9)";
-    toast.style.top = "20px"; setTimeout(() => { toast.style.top = "-100px"; }, 4000);
+    toast.style.top = "20px"; setTimeout(() => { toast.style.top = "-100px"; }, 3500);
 }
 
-// লোডিং এবং আপডেট লজিক
-async function handleRewardSequence() {
+// লোডিং এবং ব্যালেন্স আপডেট ফাংশন
+async function processReward() {
     const btn1 = document.getElementById("btn_srv1");
     const btn2 = document.getElementById("btn_srv2");
-    
-    // বাটন ডিজেবল এবং ৫ সেকেন্ডের লোডিং শুরু
+
     btn1.disabled = true;
     btn2.disabled = true;
-    const originalText1 = btn1.innerText;
-    const originalText2 = btn2.innerText;
-    btn1.innerText = "অপেক্ষা করুন (৫সে.)...";
-    btn2.innerText = "অপেক্ষা করুন (৫সে.)...";
+    notify("অপেক্ষা করুন... ৫ সেকেন্ড", "orange");
 
     setTimeout(async () => {
-        try {
-            const s = await get(userRef);
-            const settings = await get(settingsRef);
-            const currentAds = s.val().ads || 0;
-            const rewardAmt = settings.val().adReward || 1;
-            
-            // ডাটাবেস আপডেট
-            await update(userRef, { 
-                balance: (s.val().balance || 0) + rewardAmt, 
-                ads: currentAds + 1 
-            });
+        const s = await get(userRef);
+        const settings = await get(settingsRef);
+        const count = s.val().ads || 0;
 
-            // সাকসেস মেসেজ
+        if(count < (settings.val().dailyAdLimit || 100)) {
+            await update(userRef, { 
+                balance: (s.val().balance || 0) + (settings.val().adReward || 1), 
+                ads: count + 1 
+            });
             notify("Success Task! আপনার ব্যালেন্স আপডেট হয়েছে");
-        } catch (e) {
-            console.error(e);
-        } finally {
-            // বাটন পুনরায় একটিভ
-            btn1.disabled = false;
-            btn2.disabled = false;
-            btn1.innerText = originalText1;
-            btn2.innerText = originalText2;
         }
+
+        btn1.disabled = false;
+        btn2.disabled = false;
     }, 5000);
 }
 
-// Monetag SDK Trigger
 window.watchMonetag = () => { 
-    if(typeof show_10390731 === 'function') { 
-        show_10390731().then(() => {
-            handleRewardSequence();
-        }).catch(() => {
-            // Fallback for different SDK versions
-            show_10390731({ onAdClosed: () => handleRewardSequence() });
+    if(window.show_10390731) { 
+        show_10390731({
+            onAdClosed: () => { processReward(); } 
         });
-    } else {
-        notify("অ্যাড লোড হচ্ছে, পুনরায় চেষ্টা করুন", "orange");
-    }
+    } 
 };
 
-// Adexora SDK Trigger
 window.watchAdexora = () => { 
+    // Adexora Fix: Calling with callback explicitly
     if(window.showAdexora) { 
         window.showAdexora({
-            onAdClosed: () => { handleRewardSequence(); }
+            onAdClosed: () => { processReward(); }
         });
-    } else {
-        notify("অ্যাড লোড হচ্ছে, পুনরায় চেষ্টা করুন", "orange");
+    } else if(typeof adexora_show === 'function') {
+        adexora_show({
+            onAdClosed: () => { processReward(); }
+        });
     }
 };
 
@@ -236,25 +250,28 @@ onValue(settingsRef, s => {
     }
     document.getElementById("reward").innerText = v.adReward || 1;
     document.getElementById("total_limit").innerText = v.dailyAdLimit || 100;
+    
     if(v.globalNotice) document.getElementById("global_notice_text").innerText = v.globalNotice;
     if(v.botStatus === 'off'){ document.getElementById("blocker").style.display = "flex"; document.getElementById("block_msg").innerText = "বট অফ আছে 🔴"; }
 });
 
 onValue(userRef, s => {
-    if(!s.exists()) return;
+    if(!s.exists()) { set(userRef, {balance:0, ads:0, lastReset: new Date().toLocaleDateString()}); return; }
     const v = s.val();
     const count = v.ads || 0;
     document.getElementById("bal").innerText = v.balance || 0;
     document.getElementById("watched").innerText = count;
-    
+
     const btn1 = document.getElementById("btn_srv1");
     const btn2 = document.getElementById("btn_srv2");
+    
+    // বাটন টেক্সট আপডেট (বিজ্ঞাপন দেখুন রাখা হয়েছে)
     if(count > 0 && count % 10 === 0){
         btn1.innerText = "এডের উপর ক্লিক করে ২০ সেকেন্ড অপেক্ষা করুন";
         btn2.innerText = "এডের উপর ক্লিক করে ২০ সেকেন্ড অপেক্ষা করুন";
     } else {
-        btn1.innerText = "📢 অ্যাড দেখুন (সার্ভার ১)";
-        btn2.innerText = "📢 অ্যাড দেখুন (সার্ভার ২)";
+        btn1.innerText = "📢 বিজ্ঞাপন দেখুন (সার্ভার ১)";
+        btn2.innerText = "📢 বিজ্ঞাপন দেখুন (সার্ভার ২)";
     }
 });
 
@@ -269,9 +286,14 @@ onValue(withdrawsRef, (snapshot) => {
                 const color = item.status === 'pending' ? '#f39c12' : '#2ecc71';
                 historyList.innerHTML += `
                     <div class="history-item" style="border-left: 5px solid ${color}">
-                        <div><b>${item.method}</b><br><small>${item.date || ""}</small></div>
-                        <div style="text-align:right"><b style="color:#2c3e50;">${item.amount} ৳</b><br>
-                        <span style="color:${color}; font-weight:bold; font-size:11px;">${item.status.toUpperCase()}</span></div>
+                        <div>
+                            <b>${item.method}</b><br>
+                            <small>${item.date || "N/A"}</small>
+                        </div>
+                        <div style="text-align:right">
+                            <b style="color:#2c3e50;">${item.amount} ৳</b><br>
+                            <span style="color:${color}; font-weight:bold; font-size:11px;">${item.status.toUpperCase()}</span>
+                        </div>
                     </div>`;
             }
         });
@@ -284,7 +306,15 @@ window.withdraw = async () => {
     const s = await get(userRef);
     if(num.length < 10 || s.val().balance < amt) return notify("তথ্য সঠিক নয়!", "red");
     update(userRef, { balance: s.val().balance - amt });
-    push(ref(db, "withdraws"), { uid, amount: amt, method: document.getElementById("method").value, number: num, status: "pending", date: new Date().toLocaleString('bn-BD') });
+    
+    push(ref(db, "withdraws"), { 
+        uid, 
+        amount: amt, 
+        method: document.getElementById("method").value, 
+        number: num, 
+        status: "pending", 
+        date: new Date().toLocaleString('bn-BD')
+    });
     notify("উইথড্র রিকোয়েস্ট পাঠানো হয়েছে!", "#0984e3");
 };
 
