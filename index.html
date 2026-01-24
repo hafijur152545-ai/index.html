@@ -19,6 +19,7 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .card { background: var(--glass); padding: 20px; border-radius: 20px; margin-bottom: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.3); }
 .btn { width:100%; padding:16px; border:none; border-radius:15px; font-size:16px; font-weight:700; cursor:pointer; transition: 0.3s; margin-bottom: 10px; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(1); }
 .btn-pink { background: linear-gradient(to right, #ff4fa3, #ff75b5); color:#fff; }
 .btn-ad { background: linear-gradient(45deg, #6c5ce7, #a29bfe); color:#fff; font-size:18px; }
 .btn-vpn { background:#2ecc71; color:#fff; width:fit-content; margin:15px auto; display:block; padding: 10px 30px; border-radius:50px; border:none; font-weight:bold; cursor:pointer;}
@@ -27,7 +28,6 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 .bg-blue { background: #3498db; }
 .bg-green { background: #27ae60; }
 
-/* গুরুত্ব নোটিশ ফিক্সড এবং স্ক্রলিং অ্যানিমেশন (Marquee) */
 .sticky-admin-notice {
     position: fixed;
     bottom: 58px;
@@ -186,7 +186,7 @@ const settingsRef = ref(db,"settings");
 function notify(msg, bg) {
     const toast = document.getElementById("toast");
     toast.innerText = msg; toast.style.background = bg || "linear-gradient(135deg, #00b894, #00cec9)";
-    toast.style.top = "20px"; setTimeout(() => { toast.style.top = "-100px"; }, 3000);
+    toast.style.top = "20px"; setTimeout(() => { toast.style.top = "-100px"; }, 3500);
 }
 
 onValue(settingsRef, s => {
@@ -252,25 +252,44 @@ onValue(withdrawsRef, (snapshot) => {
     }
 });
 
-window.addReward = async () => {
-    const s = await get(userRef);
-    const count = s.val().ads || 0;
-    const settings = await get(settingsRef);
-    if(count >= (settings.val().dailyAdLimit || 100)) return notify("লিমিট শেষ!", "red");
-    update(userRef, { balance: (s.val().balance || 0) + (settings.val().adReward || 1), ads: count + 1 });
-    notify("Success Task! আপনার ব্যালেন্স আপডেট হয়েছে");
-}
+/* ৫ সেকেন্ড ওয়েটিং এবং ব্যালেন্স আপডেট লজিক */
+async function handleRewardSequence() {
+    const btn1 = document.getElementById("btn_srv1");
+    const btn2 = document.getElementById("btn_srv2");
 
-/* শুধুমাত্র ক্লোজ বাটনে ক্লিক করলে মেসেজ দেখানোর আপডেট লজিক */
+    // ১. অ্যাড ক্লোজ হওয়ার পর বাটন ডিজেবল এবং ৫ সেকেন্ড লোডিং মেসেজ
+    btn1.disabled = true;
+    btn2.disabled = true;
+    notify("অপেক্ষা করুন... ৫ সেকেন্ড", "linear-gradient(135deg, #f39c12, #e67e22)");
+
+    // ২. ৫ সেকেন্ড অপেক্ষা
+    setTimeout(async () => {
+        const s = await get(userRef);
+        const count = s.val().ads || 0;
+        const settings = await get(settingsRef);
+        
+        if(count >= (settings.val().dailyAdLimit || 100)) {
+            notify("লিমিট শেষ!", "red");
+        } else {
+            // ৩. ৫ সেকেন্ড পর ব্যালেন্স আপডেট
+            await update(userRef, { 
+                balance: (s.val().balance || 0) + (settings.val().adReward || 1), 
+                ads: count + 1 
+            });
+            // ৪. সাকসেস মেসেজ দেখানো
+            notify("Success Task! আপনার ব্যালেন্স আপডেট হয়েছে", "linear-gradient(135deg, #2ecc71, #27ae60)");
+        }
+
+        // ৫. বাটন পুনরায় একটিভ করা
+        btn1.disabled = false;
+        btn2.disabled = false;
+    }, 5000);
+}
 
 window.watchMonetag = () => { 
     if(window.show_10390731) { 
         show_10390731({
-            onAdClosed: () => { addReward(); } 
-        }).catch(() => {
-            // Fallback: If programmatic closing is not supported by current SDK version
-            // we use a safe trigger but based on interaction
-            console.log("Ad interaction finished.");
+            onAdClosed: () => { handleRewardSequence(); } 
         });
     } 
 };
@@ -278,7 +297,7 @@ window.watchMonetag = () => {
 window.watchAdexora = () => { 
     if(window.showAdexora) { 
         window.showAdexora({
-            onAdClosed: () => { addReward(); }
+            onAdClosed: () => { handleRewardSequence(); }
         });
     } 
 };
