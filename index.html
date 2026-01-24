@@ -32,6 +32,9 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 .ref-premium { background: linear-gradient(135deg, #6e8efb, #a777e3); padding: 20px; border-radius: 20px; margin-top: 15px; color: white; cursor: pointer; border: 2px solid #fff; box-shadow: 0 10px 20px rgba(110, 142, 251, 0.3); transition: 0.3s; text-align: center;}
 .task-card { background: #fff; padding: 15px; border-radius: 15px; border: 1px solid #eee; margin-bottom: 15px; }
 .task-link { color: #3498db; font-weight: bold; text-decoration: underline; word-break: break-all; }
+
+/* Popup Notice Animation */
+@keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 </style>
 </head>
 <body>
@@ -39,6 +42,20 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 <div id="blocker">
     <h2 style="color:#e74c3c;">আপনি ব্যান হয়েছেন</h2>
     <p>সাপোর্টে যোগাযোগ করুন: t.me/hafijur152</p>
+</div>
+
+<!-- AUTO POPUP MODAL (New) -->
+<div id="popupModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(5px);">
+    <div style="background:white; width:100%; max-width:350px; border-radius:30px; overflow:hidden; animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+        <div style="padding:25px; text-align:center;">
+            <div style="font-size:45px; margin-bottom:10px;">📢</div>
+            <h3 style="margin:0; color:#3498db; font-size:22px; font-weight:800;">নোটিস</h3>
+            <div id="popup_content" style="margin:18px 0; text-align:left; font-size:14px; color:#444; max-height:250px; overflow-y:auto; line-height:1.6; background:#f8f9fa; padding:15px; border-radius:15px; white-space:pre-wrap; border: 1px solid #eee;">
+                <!-- Content here -->
+            </div>
+            <button onclick="closePopup()" style="width:100%; padding:16px; background:#3498db; color:white; border:none; border-radius:18px; font-weight:bold; font-size:16px; cursor:pointer; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3); transition: 0.2s;">বুঝেছি</button>
+        </div>
+    </div>
 </div>
 
 <div id="floatingAd" class="floating-card">
@@ -151,6 +168,12 @@ const sRef = ref(db, "settings");
 
 let globalRew = 1; let adCount = 0; let isProcessing = false;
 
+// Popup Close Function
+window.closePopup = () => {
+    document.getElementById("popupModal").style.display = "none";
+    sessionStorage.setItem("shown_notice", "true");
+};
+
 function notify(msg) {
     const t = document.getElementById("toast");
     t.innerText = msg; t.style.top = "20px";
@@ -227,6 +250,12 @@ onValue(sRef, (s) => {
     document.getElementById("total_limit").innerText = v.dailyAdLimit || 100;
     document.getElementById("h_notice").innerText = v.globalNotice || "";
     
+    // Auto Popup Notice Logic
+    if(v.popupNotice && v.popupNotice.trim() !== "" && !sessionStorage.getItem("shown_notice")) {
+        document.getElementById("popup_content").innerText = v.popupNotice;
+        document.getElementById("popupModal").style.display = "flex";
+    }
+
     // Load Tasks
     const taskBox = document.getElementById("task_container");
     taskBox.innerHTML = "";
