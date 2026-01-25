@@ -167,6 +167,7 @@ async function checkDailyReset() {
 }
 checkDailyReset();
 
+// --- ১. টাস্ক রিয়েলটাইম ফিক্স (price চেক) ---
 onValue(ref(db, "tasks"), (snapshot) => {
     const container = document.getElementById("task_container");
     container.innerHTML = "";
@@ -176,7 +177,9 @@ onValue(ref(db, "tasks"), (snapshot) => {
     }
     snapshot.forEach((child) => {
         const task = child.val();
-        container.innerHTML += `<div class="card" style="text-align:center;"><h4 style="margin:0 0 10px 0; color:var(--secondary);">${task.rule || 'নতুন টাস্ক'}</h4><div style="background:#e8f9ee; color:#27ae60; padding:5px 15px; border-radius:10px; display:inline-block; font-weight:bold; margin-bottom:15px;">পুরস্কার: ${task.amount || '0'} ৳</div><button onclick="window.open('${task.link}', '_blank')" class="btn-ad-green"><i class="fas fa-external-link-alt"></i> টাস্ক শুরু করুন</button></div>`;
+        // আপনার এডমিন প্যানেলে price ব্যবহার করা হয়েছে, তাই এখানে amount এর বদলে price হবে
+        const taskAmount = task.price || task.amount || 0;
+        container.innerHTML += `<div class="card" style="text-align:center;"><h4 style="margin:0 0 10px 0; color:var(--secondary);">${task.rule || 'নতুন টাস্ক'}</h4><div style="background:#e8f9ee; color:#27ae60; padding:5px 15px; border-radius:10px; display:inline-block; font-weight:bold; margin-bottom:15px;">পুরস্কার: ${taskAmount} ৳</div><button onclick="window.open('${task.link}', '_blank')" class="btn-ad-green"><i class="fas fa-external-link-alt"></i> টাস্ক শুরু করুন</button></div>`;
     });
 });
 
@@ -259,7 +262,7 @@ window.runAdFlow = (type) => {
         if(watched >= (type === 'm' ? limS1 : limS2)) return notify("আজকের লিমিট শেষ!");
         
         isProcessing = true;
-        cheatDetected = false; // Reset cheat status
+        cheatDetected = false; 
         
         const btn = document.getElementById(type === 'm' ? 'btn_srv1' : 'btn_srv2');
         const oldHtml = btn.innerHTML;
@@ -272,17 +275,20 @@ window.runAdFlow = (type) => {
     });
 };
 
+// --- ২. এড টাইমার ফিক্স (মাঝখানে বের হলে টাকা যোগ হবে না) ---
 function startTimer(type, btn, oldHtml, nextCount) {
     btn.innerHTML = "বিজ্ঞাপন লোড হচ্ছে..."; btn.classList.add("btn-loading");
+    let adTime = (type === 'm' ? 9000 : 25000);
+    
     setTimeout(async () => {
+        // যদি ইউজার এড চলাকালীন পেজ থেকে বের হয়ে যায়, তবে isProcessing ফিক্স থাকবে না
         if(!isProcessing) return;
         
-        // Anti-Cheat Check
         if(cheatDetected) {
             isProcessing = false;
             btn.innerHTML = oldHtml;
             btn.classList.remove("btn-loading");
-            notify("❌ আপনি অ্যাড কেটে দিয়েছেন! ব্যালেন্স যোগ হয়নি।");
+            notify("❌ আপনি বিজ্ঞাপনটি সম্পূর্ণ দেখেননি!");
             return;
         }
 
@@ -291,16 +297,18 @@ function startTimer(type, btn, oldHtml, nextCount) {
         const rew = (type === 'm') ? rewS1 : rewS2;
         const upData = { balance: (d.balance || 0) + rew };
         if(type === 'm') upData.adsS1 = (d.adsS1 || 0) + 1; else upData.adsS2 = (d.adsS2 || 0) + 1;
+        
         await update(uRef, upData);
         
         btn.innerHTML = oldHtml; btn.classList.remove("btn-loading"); isProcessing = false;
+        
         if (nextCount % 10 === 0) {
             document.getElementById("popup_title").innerText = "টাস্ক নোটিস";
             document.getElementById("popup_content").innerText = "সবাই এডে ক্লিক করে ২০ সেকেন্ড অপেক্ষা করবেন।";
             document.getElementById("popup_btn").innerText = "Open";
             document.getElementById("popupModal").style.display = "flex";
         } else { notify(`${rew}৳ ব্যালেন্সে যোগ হয়েছে!`); }
-    }, (type === 'm' ? 9000 : 25000));
+    }, adTime);
 }
 
 window.handlePopupClick = () => {
