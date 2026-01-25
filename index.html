@@ -20,6 +20,7 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .card { background: var(--glass); padding: 18px; border-radius: 25px; margin-bottom: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.06); }
 .btn-ad-green { background: #27ae60; color: white; border: none; padding: 11px; width: 85%; margin: 0 auto; border-radius: 50px; font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: 0.3s; }
+.btn-claim { background: #e67e22 !important; } /* ক্লেইম বাটনের কালার */
 .btn-ad-purple { background: #8e44ad; color: white; border: none; padding: 11px; width: 85%; margin: 0 auto; border-radius: 50px; font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: 0.3s; }
 .btn-loading { background: #9ca3af !important; cursor: not-allowed; color: #fff; }
 
@@ -145,9 +146,9 @@ let isTabActive = true;
 let cheatDetected = false;
 
 document.addEventListener("visibilitychange", () => {
-    if (document.hidden && isProcessing) {
+    if (document.hidden) {
         isTabActive = false;
-        cheatDetected = true;
+        if(isProcessing) cheatDetected = true;
     } else {
         isTabActive = true;
     }
@@ -167,7 +168,7 @@ async function checkDailyReset() {
 }
 checkDailyReset();
 
-// --- ১. টাস্ক রিয়েলটাইম ফিক্স (price চেক) ---
+// --- ১. টাস্ক CLAIM সিস্টেম ফিক্স ---
 onValue(ref(db, "tasks"), (snapshot) => {
     const container = document.getElementById("task_container");
     container.innerHTML = "";
@@ -177,11 +178,58 @@ onValue(ref(db, "tasks"), (snapshot) => {
     }
     snapshot.forEach((child) => {
         const task = child.val();
-        // আপনার এডমিন প্যানেলে price ব্যবহার করা হয়েছে, তাই এখানে amount এর বদলে price হবে
+        const taskId = child.key;
         const taskAmount = task.price || task.amount || 0;
-        container.innerHTML += `<div class="card" style="text-align:center;"><h4 style="margin:0 0 10px 0; color:var(--secondary);">${task.rule || 'নতুন টাস্ক'}</h4><div style="background:#e8f9ee; color:#27ae60; padding:5px 15px; border-radius:10px; display:inline-block; font-weight:bold; margin-bottom:15px;">পুরস্কার: ${taskAmount} ৳</div><button onclick="window.open('${task.link}', '_blank')" class="btn-ad-green"><i class="fas fa-external-link-alt"></i> টাস্ক শুরু করুন</button></div>`;
+        
+        container.innerHTML += `
+            <div class="card" style="text-align:center;">
+                <h4 style="margin:0 0 10px 0; color:var(--secondary);">${task.rule || 'নতুন টাস্ক'}</h4>
+                <div style="background:#e8f9ee; color:#27ae60; padding:5px 15px; border-radius:10px; display:inline-block; font-weight:bold; margin-bottom:15px;">পুরস্কার: ${taskAmount} ৳</div>
+                <button id="btn_task_${taskId}" onclick="handleTaskClick('${taskId}', '${task.link}')" class="btn-ad-green">
+                    <i class="fas fa-external-link-alt"></i> টাস্ক শুরু করুন
+                </button>
+            </div>`;
     });
 });
+
+// টাস্ক ক্লিক হ্যান্ডেলার
+window.handleTaskClick = (taskId, link) => {
+    const btn = document.getElementById(`btn_task_${taskId}`);
+    
+    if (btn.innerText.includes("টাস্ক শুরু করুন")) {
+        window.open(link, '_blank');
+        btn.innerHTML = "<i class='fas fa-check-circle'></i> Claim Reward";
+        btn.classList.add("btn-claim");
+    } else if (btn.innerText.includes("Claim Reward")) {
+        claimTaskReward(taskId);
+    }
+};
+
+// টাস্ক রিওয়ার্ড ক্লেইম করা
+async function claimTaskReward(taskId) {
+    const btn = document.getElementById(`btn_task_${taskId}`);
+    btn.innerText = "Claiming...";
+    btn.disabled = true;
+
+    try {
+        const taskSnap = await get(ref(db, `tasks/${taskId}`));
+        const task = taskSnap.val();
+        const taskAmount = parseFloat(task.price || task.amount || 0);
+
+        const userSnap = await get(uRef);
+        const userData = userSnap.val() || {};
+        const currentBal = parseFloat(userData.balance || 0);
+
+        await update(uRef, { balance: currentBal + taskAmount });
+        notify(`${taskAmount}৳ ব্যালেন্সে যোগ হয়েছে!`);
+        btn.innerHTML = "<i class='fas fa-lock'></i> Completed";
+        btn.style.opacity = "0.6";
+    } catch (e) {
+        notify("ক্লেইম করতে সমস্যা হয়েছে!");
+        btn.disabled = false;
+        btn.innerHTML = "<i class='fas fa-check-circle'></i> Claim Reward";
+    }
+}
 
 async function validateVPN() {
     try {
@@ -281,14 +329,15 @@ function startTimer(type, btn, oldHtml, nextCount) {
     let adTime = (type === 'm' ? 9000 : 25000);
     
     setTimeout(async () => {
-        // যদি ইউজার এড চলাকালীন পেজ থেকে বের হয়ে যায়, তবে isProcessing ফিক্স থাকবে না
         if(!isProcessing) return;
         
-        if(cheatDetected) {
+        // যদি ইউজার ট্যাব পরিবর্তন করে বা মিনিমাইজ করে
+        if(cheatDetected || !isTabActive) {
             isProcessing = false;
             btn.innerHTML = oldHtml;
             btn.classList.remove("btn-loading");
             notify("❌ আপনি বিজ্ঞাপনটি সম্পূর্ণ দেখেননি!");
+            cheatDetected = false;
             return;
         }
 
