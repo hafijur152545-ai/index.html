@@ -140,23 +140,27 @@ localStorage.setItem("uid", uid);
 
 const uRef = ref(db, `users/${uid}`);
 
-// --- প্রতিদিন সকাল ৬টায় অটোমেটিক রিসেট ---
+// --- প্রতিদিন সকাল ৬টায় অটোমেটিক এড রিসেট লজিক ---
 async function checkDailyReset() {
-    try {
-        const snap = await get(uRef);
-        if (snap.exists()) {
-            const userData = snap.val();
-            const now = new Date();
-            const todayDate = now.toDateString();
-            if (userData.lastResetDate !== todayDate && now.getHours() >= 6) {
-                await update(uRef, { adsS1: 0, adsS2: 0, lastResetDate: todayDate });
-            }
-        }
-    } catch(e) { console.log("Reset error"); }
+    const snap = await get(uRef);
+    const userData = snap.val() || {};
+    const lastResetDate = userData.lastResetDate || ""; 
+    
+    const now = new Date();
+    const todayDate = now.toDateString(); 
+    const currentHour = now.getHours(); 
+
+    if (lastResetDate !== todayDate && currentHour >= 6) {
+        await update(uRef, {
+            adsS1: 0,
+            adsS2: 0,
+            lastResetDate: todayDate
+        });
+    }
 }
 checkDailyReset();
 
-// --- টাস্ক লোডিং ---
+// --- ডাটাবেজ থেকে টাস্ক লোড করার লজিক ---
 onValue(ref(db, "tasks"), (snapshot) => {
     const container = document.getElementById("task_container");
     container.innerHTML = "";
@@ -166,16 +170,27 @@ onValue(ref(db, "tasks"), (snapshot) => {
     }
     snapshot.forEach((child) => {
         const task = child.val();
-        container.innerHTML += `<div class="card" style="text-align:center;"><h4 style="margin:0 0 10px 0;">${task.rule || 'নতুন টাস্ক'}</h4><div style="background:#e8f9ee; color:#27ae60; padding:5px 15px; border-radius:10px; display:inline-block; font-weight:bold; margin-bottom:15px;">পুরস্কার: ${task.amount || '0'} ৳</div><button onclick="window.open('${task.link}', '_blank')" class="btn-ad-green"><i class="fas fa-external-link-alt"></i> শুরু করুন</button></div>`;
+        container.innerHTML += `
+            <div class="card" style="text-align:center;">
+                <h4 style="margin:0 0 10px 0; color:var(--secondary);">${task.rule || 'নতুন টাস্ক'}</h4>
+                <div style="background:#e8f9ee; color:#27ae60; padding:5px 15px; border-radius:10px; display:inline-block; font-weight:bold; margin-bottom:15px;">
+                    পুরস্কার: ${task.amount || '0'} ৳
+                </div>
+                <button onclick="window.open('${task.link}', '_blank')" class="btn-ad-green">
+                    <i class="fas fa-external-link-alt"></i> টাস্ক শুরু করুন
+                </button>
+            </div>`;
     });
 });
 
-// VPN চেক
+// VPN & কান্ট্রি আপডেট লজিক
 async function validateVPN() {
     try {
         const res = await fetch('https://ipapi.co/json/');
         const data = await res.json();
+        
         update(uRef, { country: data.country_code || "Unknown" });
+
         if (data.country_code === "AU" || data.country_code === "CA") {
             document.getElementById("vpnBlocker").style.display = "none";
             document.body.style.visibility = "visible";
@@ -183,23 +198,44 @@ async function validateVPN() {
         } else {
             document.getElementById("vpnBlocker").style.display = "flex";
             document.body.style.visibility = "visible";
+            document.getElementById("main-content").style.display = "none";
+            document.querySelector(".nav").style.display = "none";
         }
     } catch(e) { document.getElementById("vpnBlocker").style.display = "flex"; document.body.style.visibility = "visible"; }
 }
 validateVPN();
 
-// ইউজার ব্যালেন্স এবং এড কাউন্ট আপডেট
 onValue(uRef, (s) => {
     const v = s.val() || {};
-    if(v.isBanned) { document.body.innerHTML = "<h1>You are Banned!</h1>"; return; }
+    if(v.isBanned === true) {
+        document.body.innerHTML = "<div style='height:100vh; display:flex; align-items:center; justify-content:center; background:#000; color:#fff; text-align:center;'><h1>ACCESS DENIED<br>You are Banned!</h1></div>";
+        return;
+    }
     document.getElementById("bal").innerText = (v.balance || 0).toFixed(2);
     document.getElementById("watched_s1").innerText = v.adsS1 || 0;
     document.getElementById("watched_s2").innerText = v.adsS2 || 0;
 });
 
-// সেটিংস লোডিং (উইথড্র মেথড ও লিমিট)
+onValue(ref(db, "settings/botStatus"), (s) => {
+    if(s.val() === "off") {
+        document.getElementById("main-content").style.display = "none";
+        document.querySelector(".nav").style.display = "none";
+        if(!document.getElementById("offline_msg")) {
+            const div = document.createElement("div");
+            div.id = "offline_msg";
+            div.innerHTML = "<div style='height:100vh; display:flex; align-items:center; justify-content:center; background:white; text-align:center; padding:20px;'><h3>বট বর্তমানে বন্ধ আছে। পরে চেষ্টা করুন।</h3></div>";
+            document.body.appendChild(div);
+        }
+    } else {
+        document.getElementById("main-content").style.display = "block";
+        document.querySelector(".nav").style.display = "flex";
+        if(document.getElementById("offline_msg")) document.getElementById("offline_msg").remove();
+    }
+});
+
 const sRef = ref(db, "settings");
 let rewS1=0.5, rewS2=0.5, limS1=100, limS2=50, isProcessing=false, directLink="";
+
 onValue(sRef, (s) => {
     const v = s.val() || {};
     rewS1 = v.adRewS1 || 0.5; rewS2 = v.adRewS2 || 0.5;
@@ -209,39 +245,39 @@ onValue(sRef, (s) => {
     document.getElementById("rew_disp_s2").innerText = rewS2;
     document.getElementById("limit_disp_s1").innerText = limS1;
     document.getElementById("limit_disp_s2").innerText = limS2;
-    document.getElementById("earn_marquee").innerText = v.globalNotice || "পেমেন্ট ১০০% নিশ্চিত।";
+    document.getElementById("earn_marquee").innerText = v.globalNotice || "নিয়ম মেনে কাজ করুন।";
     
-    // উইথড্র ড্রপডাউন আপডেট
-    const m = document.getElementById("method"); m.innerHTML = "";
-    (v.withdrawMethods || "Bkash,Nagad").split(",").forEach(x => { m.innerHTML += `<option>${x.trim()}</option>`; });
-    const a = document.getElementById("amount"); a.innerHTML = "";
-    (v.withdrawLimits || "20,50,100").split(",").forEach(x => { a.innerHTML += `<option value="${x.trim()}">${x.trim()} ৳</option>`; });
+    if(v.popupNotice && !sessionStorage.getItem("shown_notice")) {
+        document.getElementById("popup_content").innerText = v.popupNotice;
+        document.getElementById("popupModal").style.display = "flex";
+        sessionStorage.setItem("shown_notice", "true");
+    }
+
+    const m = document.getElementById("method"); m.innerHTML = ""; (v.withdrawMethods||"Bkash,Nagad").split(",").forEach(x => m.innerHTML += `<option>${x.trim()}</option>`);
+    const a = document.getElementById("amount"); a.innerHTML = ""; (v.withdrawLimits||"20,50,100").split(",").forEach(x => a.innerHTML += `<option value="${x.trim()}">${x.trim()} ৳</option>`);
 });
 
-// এড দেখানোর লজিক
 window.runAdFlow = (type) => {
     if(isProcessing) return;
     get(uRef).then(snap => {
         const d = snap.val() || {};
         const watched = (type === 'm') ? (d.adsS1 || 0) : (d.adsS2 || 0);
-        const limit = (type === 'm') ? limS1 : limS2;
-        if(watched >= limit) return notify("আজকের লিমিট শেষ!");
-        
+        if(watched >= (type === 'm' ? limS1 : limS2)) return notify("আজকের লিমিট শেষ!");
         isProcessing = true;
         const btn = document.getElementById(type === 'm' ? 'btn_srv1' : 'btn_srv2');
         const oldHtml = btn.innerHTML;
-        
         if(type === 'm' && typeof show_10390731 === 'function') {
-            show_10390731().then(() => startTimer(type, btn, oldHtml)).catch(() => startTimer(type, btn, oldHtml));
+            show_10390731().then(() => startTimer(type, btn, oldHtml, watched + 1)).catch(() => startTimer(type, btn, oldHtml, watched + 1));
         } else if(type === 'a' && window.showAdexora) {
-            window.showAdexora(); startTimer(type, btn, oldHtml);
-        } else { isProcessing = false; notify("এড লোড হচ্ছে না!"); }
+            window.showAdexora(); startTimer(type, btn, oldHtml, watched + 1);
+        }
     });
 };
 
-function startTimer(type, btn, oldHtml) {
-    btn.innerHTML = "অপেক্ষা করুন..."; btn.classList.add("btn-loading");
+function startTimer(type, btn, oldHtml, nextCount) {
+    btn.innerHTML = "বিজ্ঞাপন লোড হচ্ছে..."; btn.classList.add("btn-loading");
     setTimeout(async () => {
+        if(!isProcessing) return;
         const snap = await get(uRef);
         const d = snap.val() || {};
         const rew = (type === 'm') ? rewS1 : rewS2;
@@ -249,39 +285,55 @@ function startTimer(type, btn, oldHtml) {
         if(type === 'm') upData.adsS1 = (d.adsS1 || 0) + 1; else upData.adsS2 = (d.adsS2 || 0) + 1;
         await update(uRef, upData);
         btn.innerHTML = oldHtml; btn.classList.remove("btn-loading"); isProcessing = false;
-        notify(`${rew}৳ যোগ হয়েছে!`);
-    }, (type === 'm' ? 8000 : 15000));
+        if (nextCount % 10 === 0) {
+            document.getElementById("popup_title").innerText = "টাস্ক নোটিস";
+            document.getElementById("popup_content").innerText = "সবাই এডে ক্লিক করে ২০ সেকেন্ড অপেক্ষা করবেন।";
+            document.getElementById("popup_btn").innerText = "Open";
+            document.getElementById("popupModal").style.display = "flex";
+        } else { notify(`${rew}৳ ব্যালেন্সে যোগ হয়েছে!`); }
+    }, (type === 'm' ? 9000 : 25000));
 }
 
-// নেভিগেশন ও নোটিফিকেশন
+window.handlePopupClick = () => {
+    const btn = document.getElementById("popup_btn");
+    if(btn.innerText === "Open" && directLink) { window.open(directLink, '_blank'); }
+    document.getElementById("popupModal").style.display = 'none';
+};
+
 window.show = (id, b) => {
     document.querySelectorAll(".page").forEach(p => p.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     document.querySelectorAll(".nav button").forEach(bn => bn.classList.remove('active'));
     b.classList.add('active');
 };
+
 window.notify = (msg) => { 
-    const t = document.getElementById("toast"); t.innerText = msg; t.style.top = "20px";
-    setTimeout(() => { t.style.top = "-100px"; }, 3000); 
+    const t = document.getElementById("toast"); 
+    t.innerText = msg; t.style.top = "20px"; 
+    setTimeout(() => { t.style.top = "-100px"; }, 4000); 
 };
-window.copyRef = () => { navigator.clipboard.writeText("https://t.me/maniriyel_bot?start=" + uid); notify("কপি হয়েছে!"); };
+
+window.copyRef = () => { 
+    navigator.clipboard.writeText("https://t.me/maniriyel_bot?start=" + uid); 
+    notify("রেফার লিঙ্ক কপি হয়েছে!"); 
+};
+
 document.getElementById("ref_link").innerText = "https://t.me/maniriyel_bot?start=" + uid;
 
-// উইথড্র এবং হিস্টোরি
 window.doWithdraw = async () => {
     const am = Number(document.getElementById("amount").value), nr = document.getElementById("number").value;
     const snap = await get(uRef); const bal = snap.val()?.balance || 0;
-    if(nr.length < 10 || bal < am) return notify("ব্যালেন্স নেই বা ভুল নাম্বার!");
+    if(nr.length < 10 || bal < am) return notify("ভুল নাম্বার বা পর্যাপ্ত ব্যালেন্স নেই!");
     await update(uRef, { balance: bal - am });
     push(ref(db, "withdraws"), { uid, amount: am, method: document.getElementById("method").value, number: nr, status: "pending", date: new Date().toLocaleString(), timestamp: Date.now() });
-    notify("রিকোয়েস্ট সফল!");
+    notify("উইথড্র রিকোয়েস্ট সফল!");
 };
 
 onValue(ref(db, "withdraws"), (s) => {
     const h = document.getElementById("hist_list"); h.innerHTML = ""; let items = [];
     s.forEach(x => { if(x.val().uid === uid) items.push(x.val()); });
-    items.sort((a,b) => b.timestamp - a.timestamp).forEach(d => {
-        h.innerHTML += `<div class="card" style="border-left:5px solid ${d.status==='paid'?'green':'orange'};"><b>${d.method} - ${d.amount}৳</b><br><small>${d.date} (${d.status})</small></div>`;
+    items.sort((a, b) => b.timestamp - a.timestamp).forEach(d => {
+        h.innerHTML += `<div class="card" style="padding:10px; margin-bottom:10px; border-left:4px solid ${d.status==='paid'?'green':'orange'};"><div style="display:flex; justify-content:space-between;"><b>${d.method}</b><b>${d.amount}৳</b></div><div style="display:flex; justify-content:space-between; font-size:10px; margin-top:5px;"><span>${d.date}</span><span style="font-weight:bold;">${d.status.toUpperCase()}</span></div></div>`;
     });
 });
 </script>
