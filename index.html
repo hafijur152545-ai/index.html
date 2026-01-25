@@ -22,7 +22,11 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 .btn-ad-green { background: #27ae60; color: white; border: none; padding: 11px; width: 85%; margin: 0 auto; border-radius: 50px; font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: 0.3s; }
 .btn-ad-purple { background: #8e44ad; color: white; border: none; padding: 11px; width: 85%; margin: 0 auto; border-radius: 50px; font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: 0.3s; }
 .btn-loading { background: #9ca3af !important; cursor: not-allowed; color: #fff; }
-.marquee-mid { background: #1a1a1a; color: #00d2ff; padding: 10px 0; font-size: 12px; border-radius: 15px; margin: 15px 0; overflow: hidden; }
+
+.marquee-mid { background: #1a1a1a; color: #00d2ff; padding: 10px 0; font-size: 13px; border-radius: 15px; margin: 15px 0; overflow: hidden; white-space: nowrap; position: relative; }
+.marquee-content { display: inline-block; padding-left: 100%; animation: scroll-right-to-left 15s linear infinite; }
+@keyframes scroll-right-to-left { 0% { transform: translateX(0%); } 100% { transform: translateX(-100%); } }
+
 .nav { position:fixed; bottom:15px; left:15px; right:15px; display:flex; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); padding: 12px 5px; z-index: 1000; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.5); }
 .nav button { flex:1; border:none; background:none; font-weight:700; color: #bdc3c7; cursor:pointer; font-size: 10px; }
 .nav button i { font-size: 18px; display: block; margin-bottom: 4px; }
@@ -30,7 +34,6 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 50px; transition: 0.5s ease; z-index: 3000; font-size: 13px; text-align: center; min-width: 250px; }
 .ref-box-ultra-slim { background: linear-gradient(135deg, #8593fb, #e47cfb); padding: 8px 12px; border-radius: 12px; color: white; cursor: pointer; text-align: center; box-shadow: 0 4px 15px rgba(133, 147, 251, 0.2); width: 90%; margin: 0 auto; }
 
-/* VPN Blocker UI */
 #vpnBlocker { position: fixed; inset: 0; background: #0b141e; z-index: 100000; display: none; align-items: center; justify-content: center; padding: 20px; visibility: visible; }
 .vpn-modal { background: #1a2634; width: 100%; max-width: 350px; border-radius: 30px; padding: 40px 20px; text-align: center; color: white; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
 .vpn-icon { width: 80px; height: 80px; background: rgba(255, 79, 163, 0.1); border: 2px solid #ff4fa3; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 40px; color: #ff4fa3; }
@@ -38,15 +41,7 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 </head>
 <body>
 
-<div id="vpnBlocker">
-    <div class="vpn-modal">
-        <div class="vpn-icon"><i class="fas fa-times"></i></div>
-        <h2 style="margin:0;">Access Denied!</h2>
-        <p style="color:#a0acba; margin-top:15px;">Allowed Countries: AU, CA<br>অস্ট্রেলিয়া বা কানাডা ভিপিএন কানেক্ট করুন।</p>
-        <button onclick="location.reload()" style="background:#0088cc; color:white; border:none; padding:12px 30px; border-radius:12px; font-weight:bold; cursor:pointer; margin-top:20px;">রিফ্রেশ করুন</button>
-    </div>
-</div>
-
+<div id="vpnBlocker"><div class="vpn-modal"><div class="vpn-icon"><i class="fas fa-times"></i></div><h2 style="margin:0;">Access Denied!</h2><p style="color:#a0acba; margin-top:15px;">অস্ট্রেলিয়া বা কানাডা ভিপিএন কানেক্ট করুন।</p><button onclick="location.reload()" style="background:#0088cc; color:white; border:none; padding:12px 30px; border-radius:12px; font-weight:bold; cursor:pointer; margin-top:20px;">রিফ্রেশ করুন</button></div></div>
 <div id="toast"></div>
 
 <div id="popupModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(5px);">
@@ -64,6 +59,14 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
     <div class="header">💰 <b>Earn Money Bot</b><br><span class="balance"><span id="bal">0</span> ৳</span></div>
 
     <div id="home" class="page active">
+        <div class="card" style="display: flex; align-items: center; gap: 15px; padding: 12px 20px;">
+            <div id="vpn_dot" style="width: 12px; height: 12px; background: #2ecc71; border-radius: 50%; box-shadow: 0 0 10px #2ecc71;"></div>
+            <div>
+                <span style="display: block; font-size: 11px; color: #666; font-weight: bold;">VPN STATUS</span>
+                <span id="vpn_text" style="font-size: 14px; font-weight: 800; color: #2ecc71;">Australia Connected</span>
+            </div>
+        </div>
+
         <div class="card" style="text-align: center;">
             <div style="display:flex; gap:15px; margin-bottom: 20px;">
                 <a href="https://t.me/takariyel" target="_blank" style="background:#3498db; flex:1; padding:12px; border-radius:15px; color:white; text-decoration:none; font-weight:bold; font-size:13px;">বট আপডেট</a>
@@ -72,9 +75,11 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
             <img src="https://cdn-icons-png.flaticon.com/512/2489/2489756.png" style="width: 60px; margin-bottom: 15px;">
             <div class="ref-box-ultra-slim" onclick="copyRef()"><span style="font-size: 10px; opacity: 0.9;">রেফার লিঙ্ক</span><br><strong id="ref_link" style="font-size: 11px;">https://t.me/maniriyel_bot?start=loading</strong></div>
             <p style="font-size: 13px; font-weight: bold; color: #8e44ad; margin: 10px 0;">🎁 রেফার করুন ১০% কমিশন পান</p>
-            <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
-                <a href="https://play.google.com/store/apps/details?id=free.vpnaustralia.unlimited.tunnel.proxy.secure.hotspot" target="_blank" style="background: linear-gradient(45deg, #f39c12, #d35400); color:white; text-decoration:none; padding:12px; border-radius:12px; display:block; font-weight:bold; font-size:14px;">Download VPN</a>
-            </div>
+            
+            <a href="https://play.google.com/store/apps/details?id=free.vpnaustralia.unlimited.tunnel.proxy.secure.hotspot" target="_blank" 
+               style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #e74c3c; color: white; padding: 12px; border-radius: 15px; text-decoration: none; font-weight: bold; font-size: 14px; margin-top: 10px;">
+               <i class="fas fa-shield-alt"></i> Download Australia VPN
+            </a>
         </div>
     </div>
 
@@ -88,9 +93,7 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
             <div style="font-size: 11px; color: #666; margin-bottom: 10px;">আজ দেখা হয়েছে: <span id="watched_s1">0</span> / <span id="limit_disp_s1">0</span></div>
             <button id="btn_srv1" class="btn-ad-green" onclick="runAdFlow('m')"><i class="fas fa-play-circle"></i> বিজ্ঞাপন দেখুন</button>
         </div>
-        
-        <div class="marquee-mid"><marquee id="earn_marquee" scrollamount="5">সবাই নিয়ম মেনে কাজ করুন।</marquee></div>
-
+        <div class="marquee-mid"><div class="marquee-content" id="earn_marquee">পেমেন্ট ১০০% নিশ্চিত।</div></div>
         <div class="card" style="text-align: center;">
             <div style="background: #f0e7ff; width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto; color: #8e44ad; font-size: 20px;"><i class="fas fa-video"></i></div>
             <h3 style="margin:0 0 5px 0;">Adexora বিজ্ঞাপন দেখুন</h3>
@@ -109,9 +112,6 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
             <label style="font-size:11px; font-weight:bold;">পরিমাণ</label>
             <select id="amount" style="width:100%; padding:12px; margin-bottom:12px; border:1px solid #ddd; border-radius:12px;"></select>
             <button style="background: var(--primary); color:white; border:none; padding:14px; width:100%; border-radius:12px; font-weight:bold;" onclick="doWithdraw()">Withdraw Request</button>
-            <div style="margin-top: 15px; padding: 12px; background: #fff5f8; border-radius: 15px; border: 1px dashed var(--primary); text-align: center;">
-                <p style="font-size: 12px; color: #d63384; font-weight: bold; margin: 0;">সবাই নিয়ম মেনে কাজ করবেন। পেমেন্ট নিশ্চিত।</p>
-            </div>
         </div>
     </div>
 
@@ -138,47 +138,68 @@ const tg = window.Telegram.WebApp;
 let uid = (tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user.id.toString() : (localStorage.getItem("uid") || "U"+Math.floor(Math.random()*1000000));
 localStorage.setItem("uid", uid);
 
-// --- 🛡️ ভিপিএন সিস্টেম ---
+const uRef = ref(db, `users/${uid}`);
+
+// --- প্রতিদিন সকাল ৬টায় অটোমেটিক রিসেট ---
+async function checkDailyReset() {
+    try {
+        const snap = await get(uRef);
+        if (snap.exists()) {
+            const userData = snap.val();
+            const now = new Date();
+            const todayDate = now.toDateString();
+            if (userData.lastResetDate !== todayDate && now.getHours() >= 6) {
+                await update(uRef, { adsS1: 0, adsS2: 0, lastResetDate: todayDate });
+            }
+        }
+    } catch(e) { console.log("Reset error"); }
+}
+checkDailyReset();
+
+// --- টাস্ক লোডিং ---
+onValue(ref(db, "tasks"), (snapshot) => {
+    const container = document.getElementById("task_container");
+    container.innerHTML = "";
+    if(!snapshot.exists()) {
+        container.innerHTML = "<p style='text-align:center;color:#666;'>বর্তমানে কোনো টাস্ক নেই।</p>";
+        return;
+    }
+    snapshot.forEach((child) => {
+        const task = child.val();
+        container.innerHTML += `<div class="card" style="text-align:center;"><h4 style="margin:0 0 10px 0;">${task.rule || 'নতুন টাস্ক'}</h4><div style="background:#e8f9ee; color:#27ae60; padding:5px 15px; border-radius:10px; display:inline-block; font-weight:bold; margin-bottom:15px;">পুরস্কার: ${task.amount || '0'} ৳</div><button onclick="window.open('${task.link}', '_blank')" class="btn-ad-green"><i class="fas fa-external-link-alt"></i> শুরু করুন</button></div>`;
+    });
+});
+
+// VPN চেক
 async function validateVPN() {
     try {
         const res = await fetch('https://ipapi.co/json/');
         const data = await res.json();
+        update(uRef, { country: data.country_code || "Unknown" });
         if (data.country_code === "AU" || data.country_code === "CA") {
             document.getElementById("vpnBlocker").style.display = "none";
             document.body.style.visibility = "visible";
+            document.getElementById("vpn_text").innerText = (data.country_code === "AU" ? "Australia" : "Canada") + " Connected";
         } else {
             document.getElementById("vpnBlocker").style.display = "flex";
             document.body.style.visibility = "visible";
-            document.getElementById("main-content").style.display = "none";
-            document.querySelector(".nav").style.display = "none";
         }
     } catch(e) { document.getElementById("vpnBlocker").style.display = "flex"; document.body.style.visibility = "visible"; }
 }
 validateVPN();
 
-const uRef = ref(db, `users/${uid}`);
-const sRef = ref(db, "settings");
-let rewS1=0.5, rewS2=0.5, limS1=100, limS2=50, isProcessing=false, adTimeout, directLink="";
-
-// --- টাস্ক লোডিং সিস্টেম (ফায়ারবেস থেকে) ---
-onValue(ref(db, "tasks"), (tSnap) => {
-    const tBox = document.getElementById("task_container");
-    tBox.innerHTML = "";
-    const tasks = tSnap.val();
-    if(tasks) {
-        get(uRef).then(uSnap => {
-            const uD = uSnap.val() || {};
-            Object.entries(tasks).forEach(([key, t]) => {
-                if(!uD.completedTasks?.[key]) {
-                    tBox.innerHTML += `<div class="card"><b>💰 রিওয়ার্ড: ${t.price}৳</b><p>${t.rule}</p><div style="display:flex; gap:10px;"><a href="${t.link}" target="_blank" onclick="document.getElementById('c_${key}').style.display='block'" style="background:#3498db; color:white; padding:10px; border-radius:10px; text-decoration:none; flex:1; text-align:center;">লিংক ভিজিট</a><button id="c_${key}" onclick="completeTask('${key}',${t.price})" style="background:#2ecc71; color:white; border:none; border-radius:10px; display:none; flex:1; font-weight:bold;">ক্লেম রিওয়ার্ড</button></div></div>`;
-                }
-            });
-            if(tBox.innerHTML === "") tBox.innerHTML = "<p style='text-align:center;'>বর্তমানে কোনো টাস্ক নেই</p>";
-        });
-    }
+// ইউজার ব্যালেন্স এবং এড কাউন্ট আপডেট
+onValue(uRef, (s) => {
+    const v = s.val() || {};
+    if(v.isBanned) { document.body.innerHTML = "<h1>You are Banned!</h1>"; return; }
+    document.getElementById("bal").innerText = (v.balance || 0).toFixed(2);
+    document.getElementById("watched_s1").innerText = v.adsS1 || 0;
+    document.getElementById("watched_s2").innerText = v.adsS2 || 0;
 });
 
-// --- অটো পপআপ এবং সেটিংস সিঙ্ক ---
+// সেটিংস লোডিং (উইথড্র মেথড ও লিমিট)
+const sRef = ref(db, "settings");
+let rewS1=0.5, rewS2=0.5, limS1=100, limS2=50, isProcessing=false, directLink="";
 onValue(sRef, (s) => {
     const v = s.val() || {};
     rewS1 = v.adRewS1 || 0.5; rewS2 = v.adRewS2 || 0.5;
@@ -188,44 +209,39 @@ onValue(sRef, (s) => {
     document.getElementById("rew_disp_s2").innerText = rewS2;
     document.getElementById("limit_disp_s1").innerText = limS1;
     document.getElementById("limit_disp_s2").innerText = limS2;
-    document.getElementById("earn_marquee").innerText = v.globalNotice || "নিয়ম মেনে কাজ করুন।";
+    document.getElementById("earn_marquee").innerText = v.globalNotice || "পেমেন্ট ১০০% নিশ্চিত।";
     
-    // অটো পপআপ নোটিস
-    if(v.popupNotice && !sessionStorage.getItem("shown_notice")) {
-        document.getElementById("popup_title").innerText = "নোটিস";
-        document.getElementById("popup_content").innerText = v.popupNotice;
-        document.getElementById("popup_btn").innerText = "বুঝেছি";
-        document.getElementById("popupModal").style.display = "flex";
-        sessionStorage.setItem("shown_notice", "true");
-    }
-
-    const m = document.getElementById("method"); m.innerHTML = ""; (v.withdrawMethods||"Bkash,Nagad").split(",").forEach(x => m.innerHTML += `<option>${x.trim()}</option>`);
-    const a = document.getElementById("amount"); a.innerHTML = ""; (v.withdrawLimits||"20,50,100").split(",").forEach(x => a.innerHTML += `<option value="${x.trim()}">${x.trim()} ৳</option>`);
+    // উইথড্র ড্রপডাউন আপডেট
+    const m = document.getElementById("method"); m.innerHTML = "";
+    (v.withdrawMethods || "Bkash,Nagad").split(",").forEach(x => { m.innerHTML += `<option>${x.trim()}</option>`; });
+    const a = document.getElementById("amount"); a.innerHTML = "";
+    (v.withdrawLimits || "20,50,100").split(",").forEach(x => { a.innerHTML += `<option value="${x.trim()}">${x.trim()} ৳</option>`; });
 });
 
-// --- বিজ্ঞাপন সিস্টেম ---
+// এড দেখানোর লজিক
 window.runAdFlow = (type) => {
     if(isProcessing) return;
     get(uRef).then(snap => {
         const d = snap.val() || {};
         const watched = (type === 'm') ? (d.adsS1 || 0) : (d.adsS2 || 0);
-        if(watched >= (type === 'm' ? limS1 : limS2)) return notify("আজকের লিমিট শেষ!");
+        const limit = (type === 'm') ? limS1 : limS2;
+        if(watched >= limit) return notify("আজকের লিমিট শেষ!");
+        
         isProcessing = true;
         const btn = document.getElementById(type === 'm' ? 'btn_srv1' : 'btn_srv2');
         const oldHtml = btn.innerHTML;
+        
         if(type === 'm' && typeof show_10390731 === 'function') {
-            show_10390731().then(() => startTimer(type, btn, oldHtml, watched + 1)).catch(() => startTimer(type, btn, oldHtml, watched + 1));
+            show_10390731().then(() => startTimer(type, btn, oldHtml)).catch(() => startTimer(type, btn, oldHtml));
         } else if(type === 'a' && window.showAdexora) {
-            window.showAdexora(); startTimer(type, btn, oldHtml, watched + 1);
-        }
+            window.showAdexora(); startTimer(type, btn, oldHtml);
+        } else { isProcessing = false; notify("এড লোড হচ্ছে না!"); }
     });
 };
 
-function startTimer(type, btn, oldHtml, nextCount) {
-    btn.innerHTML = "বিজ্ঞাপন লোড হচ্ছে..."; btn.classList.add("btn-loading");
-    let timer = (type === 'm') ? 8000 : 20000;
-    adTimeout = setTimeout(async () => {
-        if(!isProcessing) return;
+function startTimer(type, btn, oldHtml) {
+    btn.innerHTML = "অপেক্ষা করুন..."; btn.classList.add("btn-loading");
+    setTimeout(async () => {
         const snap = await get(uRef);
         const d = snap.val() || {};
         const rew = (type === 'm') ? rewS1 : rewS2;
@@ -233,55 +249,39 @@ function startTimer(type, btn, oldHtml, nextCount) {
         if(type === 'm') upData.adsS1 = (d.adsS1 || 0) + 1; else upData.adsS2 = (d.adsS2 || 0) + 1;
         await update(uRef, upData);
         btn.innerHTML = oldHtml; btn.classList.remove("btn-loading"); isProcessing = false;
-        if (nextCount % 10 === 0) {
-            document.getElementById("popup_title").innerText = "টাস্ক নোটিস";
-            document.getElementById("popup_content").innerText = "সবাই এডে ক্লিক করে ২০ সেকেন্ড অপেক্ষা করবেন।";
-            document.getElementById("popup_btn").innerText = "Open";
-            document.getElementById("popupModal").style.display = "flex";
-        } else { notify(`${rew}৳ ব্যালেন্সে যোগ হয়েছে!`); }
-    }, timer);
+        notify(`${rew}৳ যোগ হয়েছে!`);
+    }, (type === 'm' ? 8000 : 15000));
 }
 
-// --- অন্যান্য ফাংশন ---
-window.handlePopupClick = () => {
-    const btn = document.getElementById("popup_btn");
-    if(btn.innerText === "Open" && directLink) { window.open(directLink, '_blank'); }
-    document.getElementById("popupModal").style.display = 'none';
-};
-window.completeTask = async (taskId, reward) => {
-    const snap = await get(uRef);
-    const uData = snap.val() || {};
-    await update(uRef, { balance: (uData.balance || 0) + Number(reward), [`completedTasks/${taskId}`]: true });
-    notify(`অভিনন্দন! ${reward}৳ যোগ হয়েছে`);
-};
-onValue(uRef, (s) => {
-    const v = s.val() || {};
-    document.getElementById("bal").innerText = (v.balance || 0).toFixed(2);
-    document.getElementById("watched_s1").innerText = v.adsS1 || 0;
-    document.getElementById("watched_s2").innerText = v.adsS2 || 0;
-});
+// নেভিগেশন ও নোটিফিকেশন
 window.show = (id, b) => {
     document.querySelectorAll(".page").forEach(p => p.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     document.querySelectorAll(".nav button").forEach(bn => bn.classList.remove('active'));
     b.classList.add('active');
 };
-window.notify = (msg) => { const t = document.getElementById("toast"); t.innerText = msg; t.style.top = "20px"; setTimeout(() => { t.style.top = "-100px"; }, 4000); };
-window.copyRef = () => { navigator.clipboard.writeText("https://t.me/maniriyel_bot?start=" + uid); notify("রেফার লিঙ্ক কপি হয়েছে!"); };
+window.notify = (msg) => { 
+    const t = document.getElementById("toast"); t.innerText = msg; t.style.top = "20px";
+    setTimeout(() => { t.style.top = "-100px"; }, 3000); 
+};
+window.copyRef = () => { navigator.clipboard.writeText("https://t.me/maniriyel_bot?start=" + uid); notify("কপি হয়েছে!"); };
 document.getElementById("ref_link").innerText = "https://t.me/maniriyel_bot?start=" + uid;
+
+// উইথড্র এবং হিস্টোরি
 window.doWithdraw = async () => {
     const am = Number(document.getElementById("amount").value), nr = document.getElementById("number").value;
     const snap = await get(uRef); const bal = snap.val()?.balance || 0;
-    if(nr.length < 10 || bal < am) return notify("ভুল নাম্বার বা পর্যাপ্ত ব্যালেন্স নেই!");
+    if(nr.length < 10 || bal < am) return notify("ব্যালেন্স নেই বা ভুল নাম্বার!");
     await update(uRef, { balance: bal - am });
     push(ref(db, "withdraws"), { uid, amount: am, method: document.getElementById("method").value, number: nr, status: "pending", date: new Date().toLocaleString(), timestamp: Date.now() });
-    notify("উইথড্র রিকোয়েস্ট সফল!");
+    notify("রিকোয়েস্ট সফল!");
 };
+
 onValue(ref(db, "withdraws"), (s) => {
     const h = document.getElementById("hist_list"); h.innerHTML = ""; let items = [];
     s.forEach(x => { if(x.val().uid === uid) items.push(x.val()); });
-    items.sort((a, b) => b.timestamp - a.timestamp).forEach(d => {
-        h.innerHTML += `<div class="card" style="padding:10px; margin-bottom:10px; border-left:4px solid ${d.status==='paid'?'green':'orange'};"><div style="display:flex; justify-content:space-between;"><b>${d.method}</b><b>${d.amount}৳</b></div><div style="display:flex; justify-content:space-between; font-size:10px; margin-top:5px;"><span>${d.date}</span><span style="font-weight:bold;">${d.status.toUpperCase()}</span></div></div>`;
+    items.sort((a,b) => b.timestamp - a.timestamp).forEach(d => {
+        h.innerHTML += `<div class="card" style="border-left:5px solid ${d.status==='paid'?'green':'orange'};"><b>${d.method} - ${d.amount}৳</b><br><small>${d.date} (${d.status})</small></div>`;
     });
 });
 </script>
