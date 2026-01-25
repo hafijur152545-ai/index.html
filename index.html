@@ -161,10 +161,19 @@ async function initUser() {
 }
 initUser();
 
-// VPN Validation Logic
-let allowedCountries = "AU,CA";
+let allowedCountries = ""; 
 async function validateVPN() {
     try {
+        if (!allowedCountries || allowedCountries.trim() === "") {
+            document.getElementById("vpnBlocker").style.display = "none";
+            document.body.style.visibility = "visible";
+            document.getElementById("vpn_text").innerText = "No VPN Required";
+            document.getElementById("vpn_dot").style.background = "#2ecc71";
+            document.getElementById("main-content").style.display = "block";
+            document.querySelector(".nav").style.display = "flex";
+            return;
+        }
+
         const res = await fetch('https://ipapi.co/json/');
         const data = await res.json();
         const userCountry = data.country_code || "Unknown";
@@ -176,6 +185,8 @@ async function validateVPN() {
             document.getElementById("vpnBlocker").style.display = "none";
             document.body.style.visibility = "visible";
             document.getElementById("vpn_text").innerText = userCountry + " Connected";
+            document.getElementById("main-content").style.display = "block";
+            document.querySelector(".nav").style.display = "flex";
         } else {
             const listMsg = countryList.join(" or ");
             document.getElementById("vpn_msg").innerText = `${listMsg} ভিপিএন কানেক্ট করুন।`;
@@ -185,7 +196,6 @@ async function validateVPN() {
             document.querySelector(".nav").style.display = "none";
         }
     } catch(e) { 
-        document.getElementById("vpnBlocker").style.display = "flex"; 
         document.body.style.visibility = "visible"; 
     }
 }
@@ -201,8 +211,8 @@ onValue(sRef, (s) => {
         return;
     }
     
-    allowedCountries = v.allowedCountries || "AU,CA";
-    validateVPN(); // Re-validate when settings change
+    allowedCountries = v.allowedCountries || ""; 
+    validateVPN(); 
 
     rewS1 = v.adRewS1 || 0.5; rewS2 = v.adRewS2 || 0.5;
     limS1 = v.adLimitS1 || 100; limS2 = v.adLimitS2 || 50;
@@ -223,7 +233,6 @@ onValue(sRef, (s) => {
     const a = document.getElementById("amount"); a.innerHTML = ""; (v.withdrawLimits||"20,50,100").split(",").forEach(x => a.innerHTML += `<option value="${x.trim()}">${x.trim()} ৳</option>`);
 });
 
-// Rest of the bot logic (Tasks, Ads, Withdraw, History) - Kept identical to your source
 onValue(ref(db, "tasks"), async (snapshot) => {
     const container = document.getElementById("task_container");
     container.innerHTML = "";
@@ -285,48 +294,114 @@ onValue(uRef, (s) => {
     document.getElementById("watched_s2").innerText = v.adsS2 || 0;
 });
 
+// --- UPDATED AD FLOW & TIMER SYSTEM ---
 window.runAdFlow = (type) => {
     if(isProcessing) return;
     get(uRef).then(snap => {
         const d = snap.val() || {};
         const watched = (type === 'm') ? (d.adsS1 || 0) : (d.adsS2 || 0);
         if(watched >= (type === 'm' ? limS1 : limS2)) return notify("আজকের লিমিট শেষ!");
-        isProcessing = true; cheatDetected = false; 
+        
+        isProcessing = true; 
+        cheatDetected = false; 
         const btn = document.getElementById(type === 'm' ? 'btn_srv1' : 'btn_srv2');
         const oldHtml = btn.innerHTML;
+        
+        btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> লোড হচ্ছে..."; 
+        btn.classList.add("btn-loading");
+
         if(type === 'm' && typeof show_10390731 === 'function') {
-            show_10390731().then(() => startTimer(type, btn, oldHtml)).catch(() => startTimer(type, btn, oldHtml));
+            // Monetag - 15 Seconds Timer
+            show_10390731().then(() => {
+                startTimer(type, btn, oldHtml, 15000);
+            }).catch(() => {
+                isProcessing = false;
+                btn.innerHTML = oldHtml;
+                btn.classList.remove("btn-loading");
+                notify("অ্যাড লোড হয়নি, আবার চেষ্টা করুন!");
+            });
         } else if(type === 'a' && window.showAdexora) {
-            window.showAdexora(); startTimer(type, btn, oldHtml);
-        } else { isProcessing = false; notify("Ads not ready!"); }
+            // Adexora - 25 Seconds Timer
+            window.showAdexora(); 
+            startTimer(type, btn, oldHtml, 25000);
+        } else { 
+            isProcessing = false; 
+            btn.innerHTML = oldHtml;
+            btn.classList.remove("btn-loading");
+            notify("Ads not ready!"); 
+        }
     });
 };
 
-function startTimer(type, btn, oldHtml) {
-    btn.innerHTML = "বিজ্ঞাপন লোড হচ্ছে..."; btn.classList.add("btn-loading");
-    let adTime = (type === 'm' ? 9000 : 25000);
+function startTimer(type, btn, oldHtml, adTime) {
+    let timeLeft = adTime / 1000;
+    
+    // UI তে সেকেন্ড কমানোর জন্য ইন্টারভাল
+    const timerInterval = setInterval(() => {
+        btn.innerHTML = `<i class="fas fa-clock"></i> অপেক্ষা করুন (${timeLeft}s)`;
+        timeLeft--;
+        if (timeLeft < 0) {
+            clearInterval(timerInterval);
+        }
+    }, 1000);
+
+    // মেইন রিওয়ার্ড প্রসেসিং
     setTimeout(async () => {
         if(!isProcessing) return;
+        
+        // চিট ডিটেকশন বা ট্যাব ইনঅ্যাক্টিভ থাকলে
         if(cheatDetected || !isTabActive) {
-            isProcessing = false; btn.innerHTML = oldHtml; btn.classList.remove("btn-loading");
-            notify("❌ আপনি বিজ্ঞাপনটি সম্পূর্ণ দেখেননি!"); return;
+            isProcessing = false; 
+            btn.innerHTML = oldHtml; 
+            btn.classList.remove("btn-loading");
+            notify("❌ আপনি বিজ্ঞাপনটি সম্পূর্ণ দেখেননি!"); 
+            return;
         }
-        const snap = await get(uRef); const d = snap.val() || {}; const rew = (type === 'm') ? rewS1 : rewS2;
-        const currentTotalAds = (d.totalAds || 0) + 1;
-        const upData = { balance: (d.balance || 0) + rew, totalAds: currentTotalAds };
-        if(type === 'm') upData.adsS1 = (d.adsS1 || 0) + 1; else upData.adsS2 = (d.adsS2 || 0) + 1;
-        await update(uRef, upData);
-        if(d.referredBy && d.referredBy !== "none") {
-            const refBonus = rew * 0.10; const refUserPath = ref(db, `users/${d.referredBy}`);
-            runTransaction(refUserPath, (user) => { if (user) user.balance = (user.balance || 0) + refBonus; return user; });
+        
+        try {
+            const snap = await get(uRef); 
+            const d = snap.val() || {}; 
+            const rew = (type === 'm') ? rewS1 : rewS2;
+            const currentTotalAds = (d.totalAds || 0) + 1;
+            
+            const upData = { balance: (d.balance || 0) + rew, totalAds: currentTotalAds };
+            if(type === 'm') upData.adsS1 = (d.adsS1 || 0) + 1; 
+            else upData.adsS2 = (d.adsS2 || 0) + 1;
+            
+            await update(uRef, upData);
+            
+            // রেফার বোনাস লজিক
+            if(d.referredBy && d.referredBy !== "none") {
+                const refBonus = rew * 0.10; 
+                const refUserPath = ref(db, `users/${d.referredBy}`);
+                runTransaction(refUserPath, (user) => { 
+                    if (user) user.balance = (user.balance || 0) + refBonus; 
+                    return user; 
+                });
+            }
+            
+            btn.innerHTML = oldHtml; 
+            btn.classList.remove("btn-loading"); 
+            isProcessing = false;
+            
+            // ১০টি এড পরপর নোটিশ
+            if (currentTotalAds % 10 === 0) {
+                document.getElementById("popup_title").innerText = "টাস্ক নোটিস"; 
+                document.getElementById("popup_content").innerText = "১০টি এড শেষ! এখন এই ওপেন বাটনে ক্লিক করে এডটি দেখুন এবং ২০ সেকেন্ড অপেক্ষা করুন।";
+                document.getElementById("popup_btn").innerText = "Open"; 
+                document.getElementById("popupModal").style.display = "flex";
+            } else { 
+                notify(`${rew}৳ ব্যালেন্সে যোগ হয়েছে!`); 
+            }
+        } catch(e) {
+            isProcessing = false;
+            btn.innerHTML = oldHtml;
+            btn.classList.remove("btn-loading");
+            notify("পেমেন্ট আপডেট হতে সমস্যা হয়েছে!");
         }
-        btn.innerHTML = oldHtml; btn.classList.remove("btn-loading"); isProcessing = false;
-        if (currentTotalAds % 10 === 0) {
-            document.getElementById("popup_title").innerText = "টাস্ক নোটিস"; document.getElementById("popup_content").innerText = "১০টি এড শেষ! এখন এই ওপেন বাটনে ক্লিক করে এডটি দেখুন এবং ২০ সেকেন্ড অপেক্ষা করুন।";
-            document.getElementById("popup_btn").innerText = "Open"; document.getElementById("popupModal").style.display = "flex";
-        } else { notify(`${rew}৳ ব্যালেন্সে যোগ হয়েছে!`); }
-    }, adTime);
+    }, adTime + 1000); // ১ সেকেন্ড সেফটি বাফার
 }
+// --- END OF TIMER SYSTEM ---
 
 window.handlePopupClick = () => {
     const btn = document.getElementById("popup_btn");
