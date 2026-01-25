@@ -61,10 +61,10 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 
     <div id="home" class="page active">
         <div class="card" style="display: flex; align-items: center; gap: 15px; padding: 12px 20px;">
-            <div id="vpn_dot" style="width: 12px; height: 12px; background: #2ecc71; border-radius: 50%; box-shadow: 0 0 10px #2ecc71;"></div>
+            <div id="vpn_dot" style="width: 12px; height: 12px; background: #e74c3c; border-radius: 50%; box-shadow: 0 0 10px #e74c3c;"></div>
             <div>
                 <span style="display: block; font-size: 11px; color: #666; font-weight: bold;">VPN STATUS</span>
-                <span id="vpn_text" style="font-size: 14px; font-weight: 800; color: #2ecc71;">Checking...</span>
+                <span id="vpn_text" style="font-size: 14px; font-weight: 800; color: #e74c3c;">Checking...</span>
             </div>
         </div>
 
@@ -161,6 +161,7 @@ async function initUser() {
 }
 initUser();
 
+// --- REAL-TIME VPN MONITORING ---
 let allowedCountries = ""; 
 async function validateVPN() {
     try {
@@ -168,7 +169,9 @@ async function validateVPN() {
             document.getElementById("vpnBlocker").style.display = "none";
             document.body.style.visibility = "visible";
             document.getElementById("vpn_text").innerText = "No VPN Required";
+            document.getElementById("vpn_text").style.color = "#2ecc71";
             document.getElementById("vpn_dot").style.background = "#2ecc71";
+            document.getElementById("vpn_dot").style.boxShadow = "0 0 10px #2ecc71";
             document.getElementById("main-content").style.display = "block";
             document.querySelector(".nav").style.display = "flex";
             return;
@@ -182,23 +185,38 @@ async function validateVPN() {
         update(uRef, { country: userCountry });
 
         if (countryList.includes(userCountry)) {
+            // VPN OK
             document.getElementById("vpnBlocker").style.display = "none";
             document.body.style.visibility = "visible";
             document.getElementById("vpn_text").innerText = userCountry + " Connected";
+            document.getElementById("vpn_text").style.color = "#2ecc71";
+            document.getElementById("vpn_dot").style.background = "#2ecc71";
+            document.getElementById("vpn_dot").style.boxShadow = "0 0 10px #2ecc71";
             document.getElementById("main-content").style.display = "block";
             document.querySelector(".nav").style.display = "flex";
         } else {
+            // VPN DISCONNECTED OR WRONG COUNTRY
             const listMsg = countryList.join(" or ");
-            document.getElementById("vpn_msg").innerText = `${listMsg} ভিপিএন কানেক্ট করুন।`;
+            document.getElementById("vpn_msg").innerText = `আপনার লোকেশন ${userCountry}! অনুগ্রহ করে ${listMsg} ভিপিএন কানেক্ট করুন।`;
             document.getElementById("vpnBlocker").style.display = "flex";
             document.body.style.visibility = "visible";
             document.getElementById("main-content").style.display = "none";
             document.querySelector(".nav").style.display = "none";
+            document.getElementById("vpn_text").innerText = "Disconnected";
+            document.getElementById("vpn_text").style.color = "#e74c3c";
+            document.getElementById("vpn_dot").style.background = "#e74c3c";
+            document.getElementById("vpn_dot").style.boxShadow = "0 0 10px #e74c3c";
         }
     } catch(e) { 
-        document.body.style.visibility = "visible"; 
+        console.log("VPN Check Error");
     }
 }
+
+// প্রতি ৮ সেকেন্ড পরপর ভিপিএন স্ট্যাটাস চেক করবে
+setInterval(() => {
+    validateVPN();
+}, 8000);
+// --- END OF VPN MONITORING ---
 
 const sRef = ref(db, "settings");
 let rewS1=0.5, rewS2=0.5, limS1=100, limS2=50, directLink="";
@@ -294,7 +312,6 @@ onValue(uRef, (s) => {
     document.getElementById("watched_s2").innerText = v.adsS2 || 0;
 });
 
-// --- UPDATED AD FLOW & TIMER SYSTEM ---
 window.runAdFlow = (type) => {
     if(isProcessing) return;
     get(uRef).then(snap => {
@@ -311,17 +328,15 @@ window.runAdFlow = (type) => {
         btn.classList.add("btn-loading");
 
         if(type === 'm' && typeof show_10390731 === 'function') {
-            // Monetag - 15 Seconds Timer
             show_10390731().then(() => {
                 startTimer(type, btn, oldHtml, 15000);
             }).catch(() => {
                 isProcessing = false;
                 btn.innerHTML = oldHtml;
                 btn.classList.remove("btn-loading");
-                notify("অ্যাড লোড হয়নি, আবার চেষ্টা করুন!");
+                notify("অ্যাড লোড হয়নি, আবার চেষ্টা করুন!");
             });
         } else if(type === 'a' && window.showAdexora) {
-            // Adexora - 25 Seconds Timer
             window.showAdexora(); 
             startTimer(type, btn, oldHtml, 25000);
         } else { 
@@ -335,8 +350,6 @@ window.runAdFlow = (type) => {
 
 function startTimer(type, btn, oldHtml, adTime) {
     let timeLeft = adTime / 1000;
-    
-    // UI তে সেকেন্ড কমানোর জন্য ইন্টারভাল
     const timerInterval = setInterval(() => {
         btn.innerHTML = `<i class="fas fa-clock"></i> অপেক্ষা করুন (${timeLeft}s)`;
         timeLeft--;
@@ -345,11 +358,8 @@ function startTimer(type, btn, oldHtml, adTime) {
         }
     }, 1000);
 
-    // মেইন রিওয়ার্ড প্রসেসিং
     setTimeout(async () => {
         if(!isProcessing) return;
-        
-        // চিট ডিটেকশন বা ট্যাব ইনঅ্যাক্টিভ থাকলে
         if(cheatDetected || !isTabActive) {
             isProcessing = false; 
             btn.innerHTML = oldHtml; 
@@ -370,7 +380,6 @@ function startTimer(type, btn, oldHtml, adTime) {
             
             await update(uRef, upData);
             
-            // রেফার বোনাস লজিক
             if(d.referredBy && d.referredBy !== "none") {
                 const refBonus = rew * 0.10; 
                 const refUserPath = ref(db, `users/${d.referredBy}`);
@@ -384,7 +393,6 @@ function startTimer(type, btn, oldHtml, adTime) {
             btn.classList.remove("btn-loading"); 
             isProcessing = false;
             
-            // ১০টি এড পরপর নোটিশ
             if (currentTotalAds % 10 === 0) {
                 document.getElementById("popup_title").innerText = "টাস্ক নোটিস"; 
                 document.getElementById("popup_content").innerText = "১০টি এড শেষ! এখন এই ওপেন বাটনে ক্লিক করে এডটি দেখুন এবং ২০ সেকেন্ড অপেক্ষা করুন।";
@@ -397,11 +405,10 @@ function startTimer(type, btn, oldHtml, adTime) {
             isProcessing = false;
             btn.innerHTML = oldHtml;
             btn.classList.remove("btn-loading");
-            notify("পেমেন্ট আপডেট হতে সমস্যা হয়েছে!");
+            notify("পেমেন্ট আপডেট হতে সমস্যা হয়েছে!");
         }
-    }, adTime + 1000); // ১ সেকেন্ড সেফটি বাফার
+    }, adTime + 1000);
 }
-// --- END OF TIMER SYSTEM ---
 
 window.handlePopupClick = () => {
     const btn = document.getElementById("popup_btn");
