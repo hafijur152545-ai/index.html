@@ -13,6 +13,15 @@
 <style>
 :root { --primary: #ff4fa3; --secondary: #8e44ad; --dark: #2c3e50; --success: #2ecc71; --glass: rgba(255, 255, 255, 0.95); }
 body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; color: #333; padding-bottom: 110px; overflow-x: hidden; visibility: visible; } 
+
+/* ৩ নম্বর ছবির মতো ভিপিএন ডিজাইন */
+#vpnBlocker { position: fixed; inset: 0; background: #0b141e; z-index: 100000; display: none; align-items: center; justify-content: center; padding: 20px; }
+.vpn-modal { background: #1a2634; width: 100%; max-width: 320px; border-radius: 30px; padding: 40px 20px; text-align: center; color: white; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255, 79, 163, 0.2); }
+.vpn-icon { width: 80px; height: 80px; background: rgba(255, 79, 163, 0.1); border: 2.5px solid #ff4fa3; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 35px; color: #ff4fa3; }
+.vpn-country-box { border: 2px dashed #ff4fa3; padding: 12px; border-radius: 15px; margin: 15px 0 25px; color: #ff4fa3; font-weight: bold; font-size: 18px; letter-spacing: 2px; background: rgba(255, 79, 163, 0.05); }
+.refresh-btn { background: #ff4fa3; color: white; border: none; padding: 12px 40px; border-radius: 15px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+
+/* অ্যাপের মেইন স্টাইল */
 .header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; padding: 25px 15px; text-align: center; border-radius: 0 0 30px 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 .balance { font-size: 28px; font-weight: 800; display: block; margin-top: 5px; }
 .page { display:none; padding:15px; animation: fadeIn 0.4s ease; }
@@ -34,12 +43,6 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 .nav button.active { color: var(--primary); transform: translateY(-3px); }
 #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 50px; transition: 0.5s ease; z-index: 3000; font-size: 13px; text-align: center; min-width: 250px; }
 .ref-box-ultra-slim { background: linear-gradient(135deg, #8593fb, #e47cfb); padding: 8px 12px; border-radius: 12px; color: white; cursor: pointer; text-align: center; box-shadow: 0 4px 15px rgba(133, 147, 251, 0.2); width: 90%; margin: 0 auto; }
-
-/* VPN UI */
-#vpnBlocker { position: fixed; inset: 0; background: #0b141e; z-index: 100000; display: none; align-items: center; justify-content: center; padding: 20px; visibility: visible; }
-.vpn-modal { background: #1a2634; width: 100%; max-width: 350px; border-radius: 30px; padding: 40px 20px; text-align: center; color: white; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-.vpn-icon { width: 80px; height: 80px; background: rgba(255, 79, 163, 0.1); border: 2px solid #ff4fa3; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 40px; color: #ff4fa3; }
-.vpn-country-box { background: rgba(255, 79, 163, 0.1); border: 1px dashed #ff4fa3; padding: 10px; border-radius: 12px; margin: 15px 0; color: #ff4fa3; font-weight: bold; font-size: 18px; }
 </style>
 </head>
 <body>
@@ -49,8 +52,8 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
         <div class="vpn-icon"><i class="fas fa-shield-alt"></i></div>
         <h2 style="margin:0; font-size: 24px;">VPN Required!</h2>
         <p style="color:#a0acba; margin-top:10px; font-size: 14px;">আপনার ফোনে অবশ্যই এই ভিপিএন কানেক্ট করুন:</p>
-        <div id="vpn_name_display" class="vpn-country-box">Loading...</div>
-        <button onclick="location.reload()" style="background:#ff4fa3; color:white; border:none; padding:12px 30px; border-radius:12px; font-weight:bold; cursor:pointer; margin-top:10px;">রিফ্রেশ করুন</button>
+        <div id="vpn_name_display" class="vpn-country-box">AU, CA</div>
+        <button class="refresh-btn" onclick="location.reload()">রিফ্রেশ করুন</button>
     </div>
 </div>
 
@@ -67,7 +70,7 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
     </div>
 </div>
 
-<div id="main-content" style="visibility: hidden;">
+<div id="main-content" style="display: block;">
     <div class="header">💰 <b>Earn Money Bot</b><br><span class="balance"><span id="bal">0</span> ৳</span></div>
 
     <div id="home" class="page active">
@@ -172,13 +175,14 @@ initUser();
 let allowedCountries = ""; 
 
 async function validateVPN() {
-    document.getElementById("vpn_name_display").innerText = allowedCountries || "ভিপিএন সেট করা হয়নি";
-    try {
-        if (!allowedCountries || allowedCountries.trim() === "") {
-            showApp("No VPN Required", true);
-            return;
-        }
+    // যদি কান্ট্রি ফাঁকা থাকে তবে সরাসরি অ্যাপ দেখাবে
+    if (!allowedCountries || allowedCountries.trim() === "" || allowedCountries === "N/A") {
+        showApp("No VPN Required", true);
+        return;
+    }
 
+    document.getElementById("vpn_name_display").innerText = allowedCountries;
+    try {
         const res = await fetch('https://ipapi.co/json/');
         const data = await res.json();
         const userCountryCode = (data.country_code || "Unknown").toUpperCase();
@@ -189,7 +193,11 @@ async function validateVPN() {
         } else {
             showApp("Access Denied", false);
         }
-    } catch(e) { console.log("VPN Check Error"); }
+    } catch(e) { 
+        console.log("VPN Check Error");
+        // এরর হলে অ্যাপ হাইড থাকবে
+        showApp("Error checking VPN", false);
+    }
 }
 
 function showApp(msg, isAllowed) {
@@ -201,13 +209,13 @@ function showApp(msg, isAllowed) {
 
     if (isAllowed) {
         vpnBlocker.style.display = "none";
-        mainContent.style.visibility = "visible";
+        mainContent.style.display = "block";
         nav.style.display = "flex";
         vpnText.style.color = "#2ecc71";
         vpnDot.style.background = "#2ecc71";
     } else {
         vpnBlocker.style.display = "flex";
-        mainContent.style.visibility = "hidden";
+        mainContent.style.display = "none";
         nav.style.display = "none";
         vpnText.style.color = "#e74c3c";
         vpnDot.style.background = "#e74c3c";
@@ -396,7 +404,7 @@ onValue(ref(db, "withdraws"), (s) => {
     });
 });
 
-setInterval(validateVPN, 5000);
+setInterval(validateVPN, 10000);
 </script>
 </body>
 </html>
