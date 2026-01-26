@@ -35,19 +35,22 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 50px; transition: 0.5s ease; z-index: 3000; font-size: 13px; text-align: center; min-width: 250px; }
 .ref-box-ultra-slim { background: linear-gradient(135deg, #8593fb, #e47cfb); padding: 8px 12px; border-radius: 12px; color: white; cursor: pointer; text-align: center; box-shadow: 0 4px 15px rgba(133, 147, 251, 0.2); width: 90%; margin: 0 auto; }
 
+/* VPN UI */
 #vpnBlocker { position: fixed; inset: 0; background: #0b141e; z-index: 100000; display: none; align-items: center; justify-content: center; padding: 20px; visibility: visible; }
 .vpn-modal { background: #1a2634; width: 100%; max-width: 350px; border-radius: 30px; padding: 40px 20px; text-align: center; color: white; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
 .vpn-icon { width: 80px; height: 80px; background: rgba(255, 79, 163, 0.1); border: 2px solid #ff4fa3; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 40px; color: #ff4fa3; }
+.vpn-country-box { background: rgba(255, 79, 163, 0.1); border: 1px dashed #ff4fa3; padding: 10px; border-radius: 12px; margin: 15px 0; color: #ff4fa3; font-weight: bold; font-size: 18px; }
 </style>
 </head>
 <body>
 
 <div id="vpnBlocker">
     <div class="vpn-modal">
-        <div class="vpn-icon"><i class="fas fa-times"></i></div>
-        <h2 style="margin:0;">Access Denied!</h2>
-        <p id="vpn_msg" style="color:#a0acba; margin-top:15px;">ভিপিএন কানেক্ট করুন।</p>
-        <button onclick="location.reload()" style="background:#0088cc; color:white; border:none; padding:12px 30px; border-radius:12px; font-weight:bold; cursor:pointer; margin-top:20px;">রিফ্রেশ করুন</button>
+        <div class="vpn-icon"><i class="fas fa-shield-alt"></i></div>
+        <h2 style="margin:0; font-size: 24px;">VPN Required!</h2>
+        <p style="color:#a0acba; margin-top:10px; font-size: 14px;">আপনার ফোনে অবশ্যই এই ভিপিএন কানেক্ট করুন:</p>
+        <div id="vpn_name_display" class="vpn-country-box">Loading...</div>
+        <button onclick="location.reload()" style="background:#ff4fa3; color:white; border:none; padding:12px 30px; border-radius:12px; font-weight:bold; cursor:pointer; margin-top:10px;">রিফ্রেশ করুন</button>
     </div>
 </div>
 
@@ -64,7 +67,7 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
     </div>
 </div>
 
-<div id="main-content">
+<div id="main-content" style="visibility: hidden;">
     <div class="header">💰 <b>Earn Money Bot</b><br><span class="balance"><span id="bal">0</span> ৳</span></div>
 
     <div id="home" class="page active">
@@ -95,7 +98,7 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
         </div>
     </div>
 
-    <div id="task" class="page"><h3 style="margin-bottom: 15px;">📋 উপলব্ধ টাস্কসমূহ</h3><div id="task_container"></div></div>
+    <div id="task" class="page"><h3>📋 উপলব্ধ টাস্কসমূহ</h3><div id="task_container"></div></div>
 
     <div id="earn" class="page">
         <div class="card" style="text-align: center;">
@@ -105,9 +108,7 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
             <div style="font-size: 11px; color: #666; margin-bottom: 10px;">আজ দেখা হয়েছে: <span id="watched_s1">0</span> / <span id="limit_disp_s1">0</span></div>
             <button id="btn_srv1" class="btn-ad-green" onclick="runAdFlow('m')"><i class="fas fa-play-circle"></i> বিজ্ঞাপন দেখুন</button>
         </div>
-
         <div class="marquee-mid"><div class="marquee-content" id="earn_marquee">পেমেন্ট ১০০% নিশ্চিত।</div></div>
-
         <div class="card" style="text-align: center;">
             <div style="background: #f0e7ff; width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto; color: #8e44ad; font-size: 20px;"><i class="fas fa-video"></i></div>
             <h3 style="margin:0 0 5px 0;">Adexora বিজ্ঞাপন</h3>
@@ -121,17 +122,10 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
         <div class="card">
             <label style="font-size:11px; font-weight:bold;">মেথড</label>
             <select id="method" style="width:100%; padding:12px; margin-bottom:12px; border:1px solid #ddd; border-radius:12px;"></select>
-            
             <label style="font-size:11px; font-weight:bold;">নাম্বার</label>
             <input id="number" type="number" placeholder="আপনার নাম্বার দিন" style="width:100%; padding:12px; margin-bottom:12px; border:1px solid #ddd; border-radius:12px;">
-            
             <label style="font-size:11px; font-weight:bold;">পরিমাণ</label>
             <select id="amount" style="width:100%; padding:12px; margin-bottom:12px; border:1px solid #ddd; border-radius:12px;"></select>
-            
-            <div style="background: #fff9db; border-left: 4px solid #fcc419; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 12px; color: #666; line-height: 1.5;">
-                📌 <b>সতর্কতা:</b> পেমেন্ট পেতে সঠিক তথ্য প্রদান করুন। উইথড্র করার ২৪ ঘণ্টার মধ্যে পেমেন্ট পাবেন।
-            </div>
-
             <button style="background: var(--primary); color:white; border:none; padding:14px; width:100%; border-radius:12px; font-weight:bold;" onclick="doWithdraw()">Withdraw Request</button>
         </div>
     </div>
@@ -174,12 +168,12 @@ async function initUser() {
 }
 initUser();
 
-// --- FIXED VPN SYSTEM ---
+// --- SMART VPN LOGIC ---
 let allowedCountries = ""; 
 
 async function validateVPN() {
+    document.getElementById("vpn_name_display").innerText = allowedCountries || "ভিপিএন সেট করা হয়নি";
     try {
-        // যদি অ্যাডমিন প্যানেলে কান্ট্রি লিস্ট না থাকে, তবে ভিপিএন লাগবে না
         if (!allowedCountries || allowedCountries.trim() === "") {
             showApp("No VPN Required", true);
             return;
@@ -187,21 +181,15 @@ async function validateVPN() {
 
         const res = await fetch('https://ipapi.co/json/');
         const data = await res.json();
-        
         const userCountryCode = (data.country_code || "Unknown").toUpperCase();
         const countryList = allowedCountries.split(',').map(c => c.trim().toUpperCase());
 
-        // যদি ইউজারের কান্ট্রি এলাউড লিস্টে থাকে
         if (countryList.includes(userCountryCode)) {
             showApp(userCountryCode + " Connected", true);
         } else {
-            const listMsg = countryList.join(", ");
-            document.getElementById("vpn_msg").innerText = `আপনার লোকেশন ${userCountryCode}! অনুগ্রহ করে ${listMsg} ভিপিএন কানেক্ট করুন।`;
-            showApp("Wrong Country", false);
+            showApp("Access Denied", false);
         }
-    } catch(e) { 
-        console.log("VPN Check Error"); 
-    }
+    } catch(e) { console.log("VPN Check Error"); }
 }
 
 function showApp(msg, isAllowed) {
@@ -213,13 +201,13 @@ function showApp(msg, isAllowed) {
 
     if (isAllowed) {
         vpnBlocker.style.display = "none";
-        mainContent.style.display = "block";
+        mainContent.style.visibility = "visible";
         nav.style.display = "flex";
         vpnText.style.color = "#2ecc71";
         vpnDot.style.background = "#2ecc71";
     } else {
         vpnBlocker.style.display = "flex";
-        mainContent.style.display = "none";
+        mainContent.style.visibility = "hidden";
         nav.style.display = "none";
         vpnText.style.color = "#e74c3c";
         vpnDot.style.background = "#e74c3c";
@@ -237,7 +225,6 @@ onValue(sRef, (s) => {
         return;
     }
     
-    // কান্ট্রি লিস্ট আপডেট
     allowedCountries = v.allowedCountries || ""; 
     validateVPN(); 
 
@@ -260,7 +247,7 @@ onValue(sRef, (s) => {
     const a = document.getElementById("amount"); a.innerHTML = ""; (v.withdrawLimits||"20,50,100").split(",").forEach(x => a.innerHTML += `<option value="${x.trim()}">${x.trim()} ৳</option>`);
 });
 
-// অন্যান্য লজিক (অ্যাড এবং টাস্ক)
+// TASK SYSTEM
 onValue(ref(db, "tasks"), async (snapshot) => {
     const container = document.getElementById("task_container");
     container.innerHTML = "";
@@ -409,8 +396,7 @@ onValue(ref(db, "withdraws"), (s) => {
     });
 });
 
-// প্রতি ৮ সেকেন্ড পর পর অটোমেটিক VPN চেক হবে
-setInterval(validateVPN, 8000);
+setInterval(validateVPN, 5000);
 </script>
 </body>
 </html>
