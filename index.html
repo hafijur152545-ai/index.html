@@ -40,29 +40,33 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 .nav button i { font-size: 18px; display: block; margin-bottom: 4px; }
 .nav button.active { color: var(--primary); transform: translateY(-3px); }
 
+/* Toast Updated for Auto-hide */
 #toast { 
     position: fixed; 
-    top: -100px; 
+    top: -500px; /* Hide far up so long text doesn't peek */
     left: 50%; 
     transform: translateX(-50%); 
-    background: rgba(44, 62, 80, 0.95); 
+    background: rgba(44, 62, 80, 0.98); 
     color: white; 
-    padding: 12px 25px; 
+    padding: 15px 25px; 
     border-radius: 20px; 
-    transition: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+    transition: 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
     z-index: 10000; 
     font-size: 14px; 
     text-align: center; 
-    min-width: 280px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    width: 80%;
+    max-width: 320px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
     border: 1px solid rgba(255,255,255,0.1);
     backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
+    word-wrap: break-word;
 }
-#toast i { color: #ff4fa3; font-size: 18px; }
+#toast i { color: #ff4fa3; font-size: 18px; flex-shrink: 0; }
+#toast-msg { flex-grow: 1; line-height: 1.4; }
 
 .ref-box-ultra-slim { background: linear-gradient(135deg, #8593fb, #e47cfb); padding: 8px 12px; border-radius: 12px; color: white; cursor: pointer; text-align: center; box-shadow: 0 4px 15px rgba(133, 147, 251, 0.2); width: 90%; margin: 0 auto; }
 </style>
@@ -218,11 +222,6 @@ async function validateVPN() {
 
         await update(uRef, { country: userCountryCode });
 
-        const vpnDisplay = document.getElementById("vpn_name_display");
-        if (vpnDisplay) {
-            vpnDisplay.innerText = allowedCountries ? allowedCountries.toUpperCase() : "Any Country";
-        }
-
         if (!allowedCountries || allowedCountries.trim() === "" || allowedCountries.toUpperCase() === "N/A") {
             showApp("Online (" + userCountryCode + ")", true);
             return;
@@ -278,6 +277,10 @@ onValue(sRef, (s) => {
     }
     
     allowedCountries = v.allowedCountries || ""; 
+    const vpnDisplay = document.getElementById("vpn_name_display");
+    if (vpnDisplay) {
+        vpnDisplay.innerText = allowedCountries ? allowedCountries.toUpperCase() : "ANY COUNTRY";
+    }
     validateVPN(); 
 
     rewS1 = v.adRewS1 || 0.5; rewS2 = v.adRewS2 || 0.5;
@@ -291,9 +294,10 @@ onValue(sRef, (s) => {
     const newNotice = v.globalNotice || "";
     document.getElementById("earn_marquee").innerText = newNotice || "নিয়ম মেনে কাজ করুন।";
     
-    // Admin থেকে মেসেজ আসলে ওপর থেকে Toast আসবে এবং সাউন্ড হবে
     if (oldNotice !== "" && oldNotice !== newNotice) {
-        document.getElementById("notifSound").play().catch(() => {});
+        const audio = document.getElementById("notifSound");
+        audio.volume = 1.0; 
+        audio.play().catch(() => {});
         notify("📢 নতুন নোটিশ: " + newNotice);
     }
     oldNotice = newNotice;
@@ -405,12 +409,23 @@ window.show = (id, b) => {
     b.classList.add('active');
 };
 
+// Global Notify Function - FIXED AUTO-HIDE 5s
 window.notify = (msg) => { 
     const t = document.getElementById("toast"); 
     const m = document.getElementById("toast-msg");
+    const audio = document.getElementById("notifSound");
+    
     m.innerText = msg; 
-    t.style.top = "20px"; 
-    setTimeout(() => { t.style.top = "-100px"; }, 5000); // নোটিশ ৫ সেকেন্ড থাকবে
+    t.style.top = "20px"; // Show notice
+    
+    // Play sound
+    audio.volume = 1.0;
+    audio.play().catch(() => {});
+    
+    // Auto-hide after exactly 5 seconds
+    setTimeout(() => { 
+        t.style.top = "-500px"; // Hide far up so it's completely gone
+    }, 5000); 
 };
 
 window.copyRef = () => { navigator.clipboard.writeText("https://t.me/maniriyel_bot?start=" + uid); notify("রেফার লিঙ্ক কপি হয়েছে!"); };
