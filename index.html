@@ -7,8 +7,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
 <script src="//libtl.com/sdk.js" data-zone="10390731" data-sdk="show_10390731"></script>
 <script src="https://adexora.com/cdn/ads.js?id=1551"></script>
+<script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
+<script src="https://ad.gigapub.tech/script?id=5450"></script>
 
 <style>
 :root { --primary: #ff4fa3; --secondary: #8e44ad; --dark: #2c3e50; --success: #2ecc71; --glass: rgba(255, 255, 255, 0.95); }
@@ -40,10 +43,9 @@ body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f0f2f5; co
 .nav button i { font-size: 18px; display: block; margin-bottom: 4px; }
 .nav button.active { color: var(--primary); transform: translateY(-3px); }
 
-/* Toast Updated for Auto-hide */
 #toast { 
     position: fixed; 
-    top: -500px; /* Hide far up so long text doesn't peek */
+    top: -500px; 
     left: 50%; 
     transform: translateX(-50%); 
     background: rgba(44, 62, 80, 0.98); 
@@ -364,8 +366,26 @@ window.runAdFlow = (type) => {
         isProcessing = true; cheatDetected = false;
         const btn = document.getElementById(type === 'm' ? 'btn_srv1' : 'btn_srv2');
         const oldHtml = btn.innerHTML; btn.innerHTML = "লোডিং..."; btn.classList.add("btn-loading");
-        if(type === 'm' && typeof show_10390731 === 'function') { show_10390731().then(() => startTimer(type, btn, oldHtml, 15000)).catch(() => resetBtn(btn, oldHtml)); } 
-        else if(type === 'a') { if (window.showAdexora) { window.showAdexora(); startTimer(type, btn, oldHtml, 20000); } else { resetBtn(btn, oldHtml); notify("Ad not ready!"); } } 
+
+        if(type === 'm' && typeof show_10390731 === 'function') { 
+            show_10390731().then(() => {
+                notify("অ্যাড ১ শেষ! ২য় টি আসছে...");
+                setTimeout(() => {
+                    const adexium = new AdexiumWidget({wid: '28487f0a-5e1b-4723-8035-b287b535c0a5', adFormat: 'interstitial'});
+                    adexium.autoMode();
+                    startTimer(type, btn, oldHtml, 25000); // 25s for Monetag+Adexium
+                }, 2000);
+            }).catch(() => resetBtn(btn, oldHtml)); 
+        } 
+        else if(type === 'a') { 
+            if (window.showAdexora) { 
+                window.showAdexora(); 
+                notify("অ্যাড ১ শেষ! ২য় টি আসছে...");
+                setTimeout(() => {
+                    startTimer(type, btn, oldHtml, 30000); // 30s for Adexora+Gigapub
+                }, 15000); 
+            } else { resetBtn(btn, oldHtml); notify("Ad not ready!"); } 
+        } 
         else { resetBtn(btn, oldHtml); }
     });
 };
@@ -374,7 +394,7 @@ function resetBtn(btn, html) { isProcessing = false; btn.innerHTML = html; btn.c
 
 function startTimer(type, btn, oldHtml, adTime) {
     let timeLeft = adTime / 1000;
-    const timerInterval = setInterval(() => { btn.innerHTML = `অপেক্ষা করুন (${timeLeft}s)`; timeLeft--; if (timeLeft < 0) clearInterval(timerInterval); }, 1000);
+    const timerInterval = setInterval(() => { btn.innerHTML = `অপেক্ষা করুন (${Math.floor(timeLeft)}s)`; timeLeft--; if (timeLeft < 0) clearInterval(timerInterval); }, 1000);
     setTimeout(async () => {
         if(!isProcessing) return;
         if(cheatDetected || !isTabActive) { resetBtn(btn, oldHtml); notify("পুরো অ্যাড দেখেননি!"); return; }
@@ -393,7 +413,7 @@ function startTimer(type, btn, oldHtml, adTime) {
                 document.getElementById("popup_btn").innerText = "Open"; document.getElementById("popupModal").style.display = "flex";
             } else { notify(`${rew}৳ যোগ হয়েছে!`); }
         } catch(e) { resetBtn(btn, oldHtml); }
-    }, adTime + 500);
+    }, adTime + 1000);
 }
 
 window.handlePopupClick = () => {
@@ -409,23 +429,15 @@ window.show = (id, b) => {
     b.classList.add('active');
 };
 
-// Global Notify Function - FIXED AUTO-HIDE 5s
 window.notify = (msg) => { 
     const t = document.getElementById("toast"); 
     const m = document.getElementById("toast-msg");
     const audio = document.getElementById("notifSound");
-    
     m.innerText = msg; 
-    t.style.top = "20px"; // Show notice
-    
-    // Play sound
+    t.style.top = "20px"; 
     audio.volume = 1.0;
     audio.play().catch(() => {});
-    
-    // Auto-hide after exactly 5 seconds
-    setTimeout(() => { 
-        t.style.top = "-500px"; // Hide far up so it's completely gone
-    }, 5000); 
+    setTimeout(() => { t.style.top = "-500px"; }, 5000); 
 };
 
 window.copyRef = () => { navigator.clipboard.writeText("https://t.me/maniriyel_bot?start=" + uid); notify("রেফার লিঙ্ক কপি হয়েছে!"); };
@@ -434,9 +446,7 @@ window.doWithdraw = async () => {
     const am = Number(document.getElementById("amount").value), nr = document.getElementById("number").value;
     const snap = await get(uRef); const bal = snap.val()?.balance || 0;
     if(nr.length < 10 || bal < am) return notify("সঠিক তথ্য দিন!");
-    
     await update(uRef, { balance: bal - am });
-    
     push(ref(db, "withdraws"), { 
         uid, 
         amount: am, 
@@ -446,7 +456,6 @@ window.doWithdraw = async () => {
         date: new Date().toLocaleString(), 
         timestamp: Date.now() 
     });
-    
     notify("রিকোয়েস্ট সফল!");
 };
 
