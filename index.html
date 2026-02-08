@@ -8,7 +8,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<!-- Ad Scripts - Do not remove -->
 <script src='//libtl.com/sdk.js' data-zone='10483352' data-sdk='show_10483352'></script>
 <script src="https://adexora.com/cdn/ads.js?id=1551"></script>
 
@@ -171,7 +170,6 @@ body {
 
 <audio id="notifSound" src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3" preload="auto"></audio>
 
-<!-- VPN Blocker -->
 <div id="vpnBlocker">
     <div class="vpn-modal">
         <div class="vpn-icon"><i class="fas fa-shield-virus"></i></div>
@@ -184,7 +182,6 @@ body {
 
 <div id="toast"><i class="fas fa-check-circle"></i> <span id="toast-msg"></span></div>
 
-<!-- Notice Popup -->
 <div id="popupModal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.8); z-index:9999; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(8px);">
     <div style="background:white; width:100%; max-width:350px; border-radius:35px; overflow:hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.3);">
         <div style="padding:30px; text-align:center;">
@@ -205,7 +202,6 @@ body {
         </div>
     </div>
 
-    <!-- Home Page -->
     <div id="home" class="page active">
         <div class="card" style="display: flex; align-items: center; gap: 15px;">
             <div id="vpn_dot" style="width: 14px; height: 14px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);"></div>
@@ -234,13 +230,11 @@ body {
         </div>
     </div>
 
-    <!-- Task Page -->
     <div id="task" class="page">
         <h3 style="margin: 0 0 20px 10px; color: white;"><i class="fas fa-tasks"></i> উপলব্ধ টাস্কসমূহ</h3>
         <div id="task_container"></div>
     </div>
 
-    <!-- Earn Page -->
     <div id="earn" class="page">
         <div class="card" style="text-align: center; border-left: 6px solid #10b981;">
             <div style="background: #ecfdf5; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; color: #10b981; font-size: 24px;"><i class="fas fa-camera"></i></div>
@@ -250,7 +244,7 @@ body {
             <button id="btn_srv1" class="btn-camera btn-ad-green" onclick="runAdFlow('m')"><i class="fas fa-camera-retro"></i> বিজ্ঞাপন দেখুন</button>
         </div>
 
-        <div class="marquee-mid"><marquee scrollamount="5" id="earn_marquee">পেমেন্ট ১০০% নিশ্চিত। নিয়ম মেনে কাজ করুন।</marquee></div>
+        <div class="marquee-mid"><marquee scrollamount="5" id="earn_marquee">পেমেন্ট ১০০% নিশ্চিত। নিয়ম মেনে কাজ করুন।</marquee></div>
 
         <div class="card" style="text-align: center; border-left: 6px solid #8b5cf6;">
             <div style="background: #f5f3ff; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; color: #8b5cf6; font-size: 24px;"><i class="fas fa-video"></i></div>
@@ -261,7 +255,6 @@ body {
         </div>
     </div>
 
-    <!-- Withdraw Page -->
     <div id="withdraw" class="page">
         <div class="card">
             <h3 style="margin-top:0;"><i class="fas fa-wallet" style="color:var(--primary)"></i> উইথড্র ফরম</h3>
@@ -283,14 +276,12 @@ body {
         </div>
     </div>
 
-    <!-- History Page -->
     <div id="history" class="page">
         <h3 style="margin: 0 0 20px 10px; color: white;"><i class="fas fa-history"></i> পেমেন্ট হিস্টোরি</h3>
         <div id="hist_list"></div>
     </div>
 </div>
 
-<!-- Nav Bar -->
 <div class="nav">
     <button class="active" onclick="show('home',this)"><i class="fas fa-home"></i> হোম</button>
     <button onclick="show('task',this)"><i class="fas fa-tasks"></i> টাস্ক</button>
@@ -495,9 +486,10 @@ window.runAdFlow = (type) => {
         const oldHtml = btn.innerHTML; btn.innerHTML = "লোডিং... <i class='fas fa-spinner fa-spin'></i>"; btn.classList.add("btn-loading");
 
         if(type === 'm') {
-            if(typeof show_10390731 === 'function') {
-                show_10390731().then(() => {
-                    notify("অ্যাড লোড হয়েছে! অপেক্ষা করুন...");
+            // Updated to new Zone ID 10483352
+            if(typeof show_10483352 === 'function') {
+                show_10483352().then(() => {
+                    notify("অ্যাড লোড হয়েছে! অপেক্ষা করুন...");
                     setTimeout(() => {
                         try {
                             const adexium = new AdexiumWidget({wid: '28487f0a-5e1b-4723-8035-b287b535c0a5', adFormat: 'interstitial'});
@@ -506,7 +498,7 @@ window.runAdFlow = (type) => {
                         startTimer(type, btn, oldHtml, 5000);
                     }, 2000);
                 }).catch(() => resetBtn(btn, oldHtml));
-            } else { resetBtn(btn, oldHtml); notify("অ্যাড রেডি নয়!"); }
+            } else { resetBtn(btn, oldHtml); notify("অ্যাড রেডি নয়!"); }
         } else if(type === 'a') {
             if (window.showAdexora) {
                 window.showAdexora();
@@ -515,7 +507,7 @@ window.runAdFlow = (type) => {
                     if(window.showGiga) window.showGiga().catch(e => {});
                     startTimer(type, btn, oldHtml, 40000);
                 }, 10000); 
-            } else { resetBtn(btn, oldHtml); notify("অ্যাড রেডি নয়!"); }
+            } else { resetBtn(btn, oldHtml); notify("অ্যাড রেডি নয়!"); }
         }
     });
 };
@@ -545,7 +537,7 @@ function startTimer(type, btn, oldHtml, adTime) {
                 document.getElementById("popup_title").innerText = "ক্লিক টাস্ক (Click Task)";
                 document.getElementById("popup_content").innerText = "অভিনন্দন! ১০টি অ্যাড শেষ করেছেন। এবার 'Open' বাটনে ক্লিক করে অ্যাডটিতে ২০ সেকেন্ড ঘোরাঘুরি করুন।";
                 document.getElementById("popup_btn").innerText = "Open Ad"; document.getElementById("popupModal").style.display = "flex";
-            } else { notify(`${rew}৳ ব্যালেন্সে যোগ হয়েছে! 💸`); }
+            } else { notify(`${rew}৳ ব্যালেন্সে যোগ হয়েছে! 💸`); }
         } catch(e) { resetBtn(btn, oldHtml); }
     }, adTime + 1000);
 }
@@ -576,7 +568,7 @@ window.notify = (msg) => {
 
 window.copyRef = () => { 
     navigator.clipboard.writeText("https://t.me/maniriyel_bot?start=" + uid); 
-    notify("রেফার লিঙ্ক কপি হয়েছে! ✅"); 
+    notify("রেফার লিঙ্ক কপি হয়েছে! ✅"); 
 };
 
 window.doWithdraw = async () => {
@@ -585,7 +577,7 @@ window.doWithdraw = async () => {
     if(nr.length < 10 || bal < am) return notify("সঠিক তথ্য বা পর্যাপ্ত ব্যালেন্স নেই!");
     await update(uRef, { balance: bal - am });
     push(ref(db, "withdraws"), { uid, amount: am, method: document.getElementById("method").value, number: nr, status: "pending", date: new Date().toLocaleString(), timestamp: Date.now() });
-    notify("রিকোয়েস্ট সফল হয়েছে! 📥");
+    notify("রিকোয়েস্ট সফল হয়েছে! 📥");
 };
 
 onValue(ref(db, "withdraws"), (s) => {
@@ -610,5 +602,3 @@ setInterval(validateVPN, 15000);
 </script>
 </body>
 </html>
-
---- END OF FILE Paste January 27, 2026 - 1:25PM ---
